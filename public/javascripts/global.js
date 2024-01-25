@@ -57,7 +57,7 @@ function create_light_filter(svg){
     return svg;
 }
 
-function create_gradient_filter(svg){
+function create_gradient_filter(svg, color){
     var gradFill = svg
         .append('defs')
         .append('linearGradient')
@@ -69,7 +69,7 @@ function create_gradient_filter(svg){
 
         gradFill.append('stop')
         .attr('offset', '0%')
-        .style('stop-color', "khaki") //whitesmoke
+        .style('stop-color', color) //whitesmoke
         .style('stop-opacity', 1);
 
         gradFill.append('stop')
@@ -79,13 +79,13 @@ function create_gradient_filter(svg){
 
         gradFill.append('stop')
         .attr('offset', '100%')
-        .style('stop-color', 'khaki') //grey
+        .style('stop-color', color) //grey
         .style('stop-opacity', 1);
 
     return svg;
 }
 
-// us state fips codes
+// us state fips codes (read from json now)
 const fips = {
     "Alabama": "01",
     "Alaska": "02",
