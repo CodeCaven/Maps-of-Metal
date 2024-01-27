@@ -9,6 +9,7 @@
     <script src="./javascripts/global.js"></script>
     <!--<script src="https://d3js.org/d3.v4.min.js"></script>-->
     <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="https://unpkg.com/d3-force-cluster@latest"></script><!--clsuter force-->
     <script src="https://unpkg.com/d3-force-boundary@0.0.1/dist/d3-force-boundary.min.js"></script> <!--d3 force boundary add on-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.5/turf.min.js"></script><!--turf for d3 winding order-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -41,17 +42,18 @@
         let current_projection;
         let simulation;
         let svg;
-        let region = "California";
-        let display_region = "US"; // World
-        let pop_max = 2500000;
+        let region = "Sweden";
+        let display_region = "World"; // World
+        let pop_max = 200000;
         let THEME = "light";
-        let current_year = 1978;
+        let current_year = 1979;
         let prev_year;
         let display_continent = "North America"; // test for contnent grouping
         let us_region = "Midwest"; // state regions needs debugging
         let nodes = [];
         let links = [];
         let spacing = 30;
+        let display_bands = {"thrash": true, "black": true}
         
 
         // DOM loaded callback
@@ -93,14 +95,17 @@
 
            // set background by theme
            if(THEME == "dark"){
-           document.body.style.backgroundColor = "black";
+             document.body.style.backgroundColor = "black";
+             document.getElementById("yearDisplay").style.color = "white";
            }else{
-            document.body.style.backgroundColor = "white";
+             document.body.style.backgroundColor = "white";
+             document.getElementById("yearDisplay").style.color = "black";
            }
 
            
            draw_map();
-           create_graph(current_projection);
+           //create_graph(current_projection);
+           update_bands();
            
          }, false);
 
@@ -119,7 +124,7 @@
                     year_display.innerHTML = current_year;
                     //var graph = create_graph(current_projection);
                     //update_bands(graph);
-                    update_graph(current_projection);
+                    update_graph(current_projection, black_lookup, black_bands, "black");
                     return;
                 }
             }
@@ -134,7 +139,7 @@
                     year_display.innerHTML = current_year;
                     //var graph = create_graph(current_projection);
                     //update_bands(graph);
-                    update_graph(current_projection);
+                    update_graph(current_projection, black_lookup, black_bands, "black");
                     return;
                 }
             }
@@ -185,11 +190,11 @@
             return false;
          }
 
-         function update_graph(projection){
+         function update_graph(projection, lookup, bands, genre){
 
             // get indexes
-            var prev_band_indexes = thrash_lookup[prev_year];
-            var curr_band_indexes = thrash_lookup[current_year];
+            var prev_band_indexes = lookup[prev_year];
+            var curr_band_indexes = lookup[current_year];
 
             // bands to add/remove
             var add_indexes = curr_band_indexes.filter(i => !prev_band_indexes.includes(i));
@@ -199,28 +204,26 @@
             for(let a of add_indexes){
 
                 // get band
-                var band = thrash_bands.filter(o => o.index == a)[0];
+                var band = bands.filter(o => o.index == a)[0];
 
                 // US
                 if(display_region == "US" && band['loc']['state'] == region){
 
                     // create nodes (2 for eaach band)
-                    var new_base_node = {"id": "base" + band['index'], "type":"thrash", "nodeType":"base",
+                    var new_base_node = {"id": "base" + band['index'], "type":genre, "nodeType":"base",
                                             "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                                             "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                             "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
 
-                    var new_band_node = {"id": "band" + band['index'], "type":"thrash", "nodeType":"band",
+                    var new_band_node = {"id": "band" + band['index'], "type":genre, "nodeType":"band",
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                     "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
 
                     var new_link = {"source":"base" + band['index'], 
-                                    "target":"band" + band['index'],
-                                    "value": spacing};
-                    spacing += 10;
+                                    "target":"band" + band['index']};
                     nodes.push(new_base_node);
                     nodes.push(new_band_node);
                     links.push(new_link);
@@ -230,23 +233,21 @@
                 if(display_region == "World" && band['loc']['country'] == region){
 
                     // create nodes (2 for eaach band)
-                    var new_base_node = {"id": "base" + band['index'], "type":"thrash", "nodeType":"base",
+                    var new_base_node = {"id": "base" + band['index'], "type":genre, "nodeType":"base",
                                             "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                                             "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                             "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
 
-                    var new_band_node = {"id": "band" + band['index'], "type":"thrash", "nodeType":"band",
+                    var new_band_node = {"id": "band" + band['index'], "type":genre, "nodeType":"band",
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                     "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
 
                     var new_link = {"source":"base" + band['index'], 
-                                    "target":"band" + band['index'],
-                                    "value": spacing};
+                                    "target":"band" + band['index']};
 
-                    spacing += 10;
                     nodes.push(new_base_node);
                     nodes.push(new_band_node);
                     links.push(new_link);
@@ -257,11 +258,11 @@
             for(let r of remove_indexes){
 
                 // get band
-                var band = thrash_bands.filter(o => o.index == r)[0];
+                var band = bands.filter(o => o.index == r)[0];
 
                 // remove 2 nodes
                 nodes = nodes.filter(obj => obj.id != "band" + band['index'] && obj.id != "base" + band['index']);
-
+            
                 // remove link
                 links = links.filter(obj => obj.source.id != "base" + band['index'])
                 spacing -= 10;
@@ -274,34 +275,32 @@
          }
 
          // create a graph of nodes and edges by current year
-         function create_graph(projection){
+         function create_graph(projection, lookup, bands, genre){
 
             // current year thrash indexes
-            var thrash_indexes = thrash_lookup[current_year];
-            for(let band of thrash_bands){
+            var thrash_indexes = lookup[current_year];
+            for(let band of bands){
 
                 // US
                 if(display_region == "US" && band['loc']['state'] == region){
                     if(thrash_indexes.includes(band['index'])){
                         
                         // create nodes (2 for eaach band) and link
-                        var new_base_node = {"id": "base" + band['index'], "type":"thrash", "nodeType":"base",
+                        var new_base_node = {"id": "base" + band['index'], "type":genre, "nodeType":"base",
                                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                                         "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                         "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
 
-                        var new_band_node = {"id": "band" + band['index'], "type":"thrash", "nodeType":"band",
+                        var new_band_node = {"id": "band" + band['index'], "type":genre, "nodeType":"band",
                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
 
                         var new_link = {"source":"base" + band['index'], 
-                                    "target":"band" + band['index'],
-                                    "value": spacing};
+                                    "target":"band" + band['index']};
 
-                        spacing += 10
                         nodes.push(new_base_node);
                         nodes.push(new_band_node);
                         links.push(new_link);
@@ -326,17 +325,14 @@
                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
 
                         var new_link = {"source":"base" + band['index'], 
-                                    "target":"band" + band['index'],
-                                    "value": spacing};
+                                    "target":"band" + band['index']};
 
-                        spacing += 10;
                         nodes.push(new_base_node);
                         nodes.push(new_band_node);
                         links.push(new_link);
                     }
                 }
             }
-            update_bands();
          }
 
          function draw_map(){
@@ -375,30 +371,20 @@
             svg = d3.select("#plot_div")
             .append("svg")
                 .attr("id" , "svgArea")
-                .attr("width", plot_width)
-                .attr("height", plot_height)
-                .attr("viewBox", [0, 0, plot_width, plot_height]) // add zoom here to avoid pan jitter
+                .attr("width", width)
+                .attr("height", height)
+                .attr("viewBox", [0, 0, width, height]) // add zoom here to avoid pan jitter
                 .attr("style", "width: 100%; height: auto; height: intrinsic;")
-                .style("background-color", "black")
+                .style("background-color", function(){
+                    if(THEME == "dark"){return "black";}
+                    return "white";
+                })
                 //.call(zoom)
             .append("g")
                 .attr("transform",
                     "translate(" + margin.left + "," + margin.top + ")");
 
-            // background
-            svg.
-            append("rect")
-            .attr("id", "backLine")
-            .attr("width", width)
-            .attr("height",height)
-            .attr("fill", function(){
-                if(THEME == "dark"){return "black"}
-                return "white";
-            })
-            .attr("x",margin.left)
-            .attr("y",margin.top);
-
-            let mapColour = "darkolivegreen";
+            let mapColour = "khaki";
             svg = create_light_filter(svg);
             svg = create_gradient_filter(svg, mapColour);
 
@@ -408,7 +394,7 @@
             if(display_region == "US"){
                 var display_states = us_counties.features.filter(prop => prop.properties.STATE == us_state_data[region]["fips_code"]);
                 var places_points = world_places.features.filter(prop => prop.properties.ADM1NAME == region && prop.properties.POP_MAX > pop_max);
-
+                //var display_boundary = world_states.features.filter(prop => prop.properties.name == region)
                 // by region (needs debugging)
                 //var display_states = us_counties.features.filter(prop => in_us_region_fips(prop.properties.STATE));
                 //var places_points = world_places.features.filter(prop => in_us_region_name(prop.properties.ADM1NAME) && prop.properties.POP_MAX > pop_max);
@@ -432,6 +418,7 @@
             proj.fitSize([width,height],{"type": "FeatureCollection","features":fixed_states});
             current_projection = proj;
             const path = d3.geoPath().projection(current_projection);
+            create_graph(current_projection, black_lookup, black_bands, "black"); //create initial graph
 
             // scales
             var radScale = d3.scaleSqrt()
@@ -441,6 +428,11 @@
             var textScale = d3.scaleLinear()
             .domain([pop_max, 10*pop_max])
             .range([1, 3]).clamp(true);
+
+            // NOT USED: need to figure out how to update existing nodes using update()
+            var imageScale = d3.scaleLinear()
+            .domain([1, 500])// number of nodes
+            .range([100, 5]).clamp(true); 
 
             
             // counties or states
@@ -458,6 +450,7 @@
             })
             .attr("stroke-width", 2)
             .attr("class", "statearea");
+            
 
             // add links (here so behind other elements)
             var link = svg.append("g")
@@ -465,16 +458,13 @@
             .selectAll("edges");
 
             // add base nodes (circle) here so behind
-            var node = svg.append("g")
+            var base_node = svg.append("g")
             .attr("class", "nodes")
-            .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended)).selectAll("bands");
+            .selectAll("bands");
 
 
             /*** place names **/
-            var place_radius = 7;
+            var place_radius = 4;
             // add first for bounding box
             svg
             .selectAll("text")
@@ -536,42 +526,38 @@
             .text(d => d.properties.NAME);
             
         /* FORCE SIMULATION */
-        //var graph = create_graph(current_projection);
-        //console.log(graph);
 
         // Create a simulation with several forces.
+        // https://github.com/ericsoco/d3-force-cluster
         // https://observablehq.com/@d3/force-directed-graph/2?collection=@d3/d3-force
-        simulation = d3.forceSimulation(nodes).alpha(0.5)
-            .force("link", d3.forceLink(links).id(d => d.id).distance(200).strength(0.3))
-            .force("collide", d3.forceCollide().radius(20))
-            .force("boundary", forceBoundary(0, 0, plot_width, plot_height - 100).strength(0.005))
-            .on("tick", ticked);
-          
-            
-        // add nodes
-        /*
-        var node = svg.append("g")
-        .attr("class", "nodes")
-        .attr("fill", "red")
-        .attr("stroke", "blue")
-        .attr("stroke-width", 2)
-        .style("stroke-opacity", 0.5)
-        .call(d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended)).selectAll("bands");
-        */
+        // collision warming
+        // https://stamen.com/forcing-functions-inside-d3-v4-forces-and-layout-transitions-f3e89ee02d12/
 
-        // add band nodes (image)
-        var image_node = svg.append("g")
+        // add band nodes (image) NOTE: need to give image nodes data before update function (for positions i think)
+        var node = svg.append("g").selectAll("images")
+        .data(nodes, d => d.id)
+        .enter().append('image')
+        .attr("xlink:href", d => "logos/" + d.logo)
+        .attr("height", function(d){
+                    if(d.nodeType=="base"){return 0;}
+                    return 30;
+        })
         .attr("class", "nodes")
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
-            .on("end", dragended)).selectAll("images");
+            .on("end", dragended));
 
         
-        // places
+        simulation = d3.forceSimulation(nodes).alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+            .force("link", d3.forceLink(links).id(d => d.id).distance(150).strength(0.8))
+            .force("collide", d3.forceCollide().radius(30))
+            .force("forceY", d3.forceY().strength(0.05))
+            //.force('cluster', d3.forceCluster().centers(get_clusters(width, height)).strength(0.5))
+            .force("boundary", forceBoundary(0, 0, plot_width, plot_height - 100).strength(0.005))
+            .on("tick", ticked);
+
+        // places (just using base nodes atm)
         /*
         svg
             .selectAll("places")
@@ -589,9 +575,7 @@
             .attr("stroke-width", 3)
             .attr("fill-opacity", 1)
             .attr("stroke-opacity", 0.7);
-            */
-
-        
+        */
             
         // ticked function
         function ticked() {
@@ -602,32 +586,30 @@
             .attr("x2", d => d.target.x)
             .attr("y2", d => d.target.y);
     
-            image_node
-            .attr("x", d => d.x)
-            .attr("y",d => d.y);
-
             node
+            .attr("x", d => d.x)
+            .attr("y", d => d.y);
+
+            base_node
             .attr("cx", d => d.x)
             .attr("cy",d => d.y);
             
         }
 
         update_bands = function(){
+            console.log(nodes);
+            console.log(links);
 
-            // Make a shallow copy to protect against mutation, while
-            // recycling old nodes to preserve position and velocity.
-            //const old = new Map(node.data().map(d => [d.id, d]));
-            //nodes = nodes.map(d => ({...old.get(d.id), ... d}));
-            //links = links.map(d => ({...d}));
+            // Dont use join as messes with exit
+            // Instead define seperate enter() amd exit() and use merge as below
+            // Always mutate the nodes/links arrays (ie manually add/remove and never overwrite)
+            
+            // base node
+            base_node = base_node.data(nodes, d => d.id);
+            base_node.exit().transition().duration(1000).style("opacity", 0).remove();
 
-            simulation.nodes(nodes);
-            simulation.force("link").links(links);
-            simulation.alpha(0.5).restart().tick();
-            
-            
-            node = node
-                .data(nodes, d => d.id)
-                .join(enter => enter.append("circle")
+            base_node = base_node
+                .enter().append("circle")
                 .attr("class", "nodes")
                 .attr("fill", "blue")
                 .attr("stroke", "white")
@@ -637,41 +619,47 @@
                 .attr("r", function(d){
                     if(d.nodeType == "base"){return place_radius;}
                     return 0;
-                }));
-            node.exit().remove();
+                }).merge(base_node);
             
-            image_node = image_node
-                .data(nodes, d => d.id)
-                .join(enter => enter.append("image")
+            
+            // image nodes
+            node = node.data(nodes, d => d.id);
+            node.exit().transition().duration(1000).style("opacity", 0).remove();
+            
+            node = node
+                .enter().append("image")
                 .attr("class", "nodes")
                 .attr("xlink:href", d => "logos/" + d.logo)
                 .attr("height", function(d){
                     if(d.nodeType=="base"){return 0;}
                     return 30;
-                })
-                .attr("alt", d => d.display_name)
-                .call(d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended)));
-                
-            image_node.exit().remove();
+                }).call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended)).merge(node);
 
-            //link = link.exit.remove();
+            
+            
+                
+            // links
+            link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
+            link.exit().transition().duration(1000).style("opacity", 0).remove();
+
             link = link
-                .data(links, d => [d.source, d.target])
-                .join("line")
+                .enter()
+                .append("line")
                 .attr("class", "links")
                 .attr("stroke-width", 1)
                 .attr("stroke-opacity", 0.5)
                 .attr("fill", "blue")
-                .attr("stroke", "blue");
-            link.exit().remove();
-
-            
+                .attr("stroke", "blue").merge(link);
+                
+        
+            simulation.nodes(nodes);
+            simulation.force("link").links(links);
+            simulation.alphaTarget(0.5).restart().tick();
             ticked(); // render now!
-
-             
+            
         }
 
         // get bb of text
@@ -682,7 +670,40 @@
     }
 
     
+    function get_clusters(w, h){
+        // Determine the cluster points
+        var clusters = [];
 
+        clusters.push({
+            cluster: 1,
+            radius: 100,
+            x: 50,
+            y: 50
+        });
+
+        clusters.push({
+            cluster: 2,
+            radius: 100,
+            x: w - 50,
+            y: 50
+        });
+
+        clusters.push({
+            cluster: 3,
+            radius: 100,
+            x: 50,
+            y: h - 50
+        });
+
+        clusters.push({
+            cluster: 4,
+            radius: 100,
+            x: w - 50,
+            y: h - 50
+        });
+
+       return clusters;
+    }
         
   // Reheat the simulation when drag starts, and fix the subject position.
   function dragstarted(event) {

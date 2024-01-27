@@ -74,7 +74,7 @@ function create_gradient_filter(svg, color){
 
         gradFill.append('stop')
         .attr('offset', '50%')
-        .style('stop-color', 'white')//lightgrey
+        .style('stop-color', 'whitesmoke')//lightgrey
         .style('stop-opacity', 1);
 
         gradFill.append('stop')
