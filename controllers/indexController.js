@@ -12,7 +12,9 @@ exports.genres = function(req, res) {
     // geojson 4 maps
     let mapPlaces = fs.readFileSync("./public/jsons/ne_10m_populated_places.json", 'utf8');
     let mapStates = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank.json", 'utf8');
+    let mapBoundaries = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries.json", 'utf8');
     let usCounties = fs.readFileSync("./public/jsons/gz_2010_us_050_00_500k.json", 'utf8');
+    let usStates = fs.readFileSync("./public/jsons/gz_2010_us_040_00_5m.json", 'utf8');
 
     // map datastructures
     let metalContinents = fs.readFileSync("./public/jsons/metal_continents.json", 'utf8');
@@ -26,7 +28,9 @@ exports.genres = function(req, res) {
                           ejs_state_data: usStateData,
                           ejs_places: mapPlaces,
                           ejs_states: mapStates,
-                          ejs_counties: usCounties});
+                          ejs_counties: usCounties,
+                          ejs_us_states: usStates,
+                          ejs_map_countries: mapBoundaries});
 
     
     function error_handle(e){
