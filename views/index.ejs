@@ -2,21 +2,24 @@
 <html lang="en">
   <% include ./partials/index-head %>
   <body>
-    <div class="container">
+    <div class="container-fluid">
       <div class="row">
         
-        <div class="col-11"><div id="plot_div"></div></div>
-        <div class="col-1">
-          <!--Year-->
-          <h1 id="yearDisplay" class="text-center display-6" style="color:white;"></h1>
-          <div id="yearControl" class="btn-group" role="group" aria-label="Basic example">
-            <button id="left" type="button" class="btn btn-dark"><<</button>
-            <button id="right" type="button" class="btn btn-dark">>></button>
-          </div>
-          <!--Dropdown-->
-          
+        <div class="col-12"><div id="plot_div"></div></div>
+
+          <!-- Draggable controls-->
+        <div id="controls">
+          <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+          <div id="controlsheader" class="controlsheader" data-mdb-toggle="collapse" data-mdb-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">
+              <!--Year-->
+              <h2 id="yearDisplay" class="text-center" style="color:white;"></h2>
+              <div id="yearControl" class="btn-group" role="group" aria-label="Basic example" style="display:flex;">
+                <button id="left" type="button" class="btn btn-dark"><<</button>
+                <button id="right" type="button" class="btn btn-dark">>></button>
+              </div>
+              <h4 id="regionDisplay" class="text-center" style="color:white;"></h4>
         </div>
-       
+       </div>
        
       </div>
     </div>

@@ -20,28 +20,28 @@ function get_thrash_icon(iconID, name){
     return icon_string;
 }
 
-function create_light_filter(svg){
+function create_light_filter(svg, colour){
     // light filter
     //** spec lighting filter **//
     var lightFilterSVG = svg.
     append("filter")
-    .attr("id", "specular")
+    .attr("id", "specular"+colour)
     .attr("primitiveUnits", "objectBoundingBox");
 
     var feSpecFilterSVG = lightFilterSVG
     .append("feSpecularLighting")
     .attr("result", "specOut")
     .attr("in", "SourceGraphic")
-    .attr("lighting-color", "white")
-    .attr("surfaceScale", "1")
+    .attr("lighting-color", colour)
+    .attr("surfaceScale", "5") // was 1 for normal effect
     .attr("specularExponent", "30")
     .attr("specularConstant", "0.4");
 
 
     feSpecFilterSVG
     .append("fePointLight")
-    .attr("x", "0.25")
-    .attr("y", "0.25")
+    .attr("x", "0.5") // was 0.25
+    .attr("y", "0.5") // was 0.25
     .attr("z", "0.3");
 
     lightFilterSVG
@@ -85,57 +85,44 @@ function create_gradient_filter(svg, color){
     return svg;
 }
 
-// us state fips codes (read from json now)
-const fips = {
-    "Alabama": "01",
-    "Alaska": "02",
-    "Arizona": "04",
-    "Arkansas": "05",
-    "California": "06",
-    "Colorado": "08",
-    "Connecticut": "09",
-    "Delaware": "10",
-    "Florida": "12",
-    "Georgia": "13",
-    "Hawaii": "15",
-    "Idaho": "16",
-    "Illinois": "17",
-    "Indiana": "18",
-    "Iowa": "19",
-    "Kansas": "20",
-    "Kentucky": "21",
-    "Louisiana": "22",
-    "Maine": "23",
-    "Maryland": "24",
-    "Massachusetts": "25",
-    "Michigan": "26",
-    "Minnesota": "27",
-    "Mississippi": "28",
-    "Missouri": "29",
-    "Montana": "30",
-    "Nebraska": "31",
-    "Nevada": "32",
-    "New Hampshire": "33",
-    "New Jersey": "34",
-    "New Mexico": "35",
-    "New York": "36",
-    "North Carolina": "37",
-    "North Dakota": "38",
-    "Ohio": "39",
-    "Oklahoma": "40",
-    "Oregon": "41",
-    "Pennsylvania": "42",
-    "Rhode Island": "44",
-    "South Carolina": "45",
-    "South Dakota": "46",
-    "Tennessee": "47",
-    "Texas": "48",
-    "Utah": "49",
-    "Vermont": "50",
-    "Virginia": "51",
-    "Washington": "53",
-    "West Virginia": "54",
-    "Wisconsin": "55",
-    "Wyoming": "56"
-  }
+  function dragElement(elmnt) {
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    if (document.getElementById(elmnt.id + "header")) {
+        // if present, the header is where you move the DIV from:
+        document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+    } else {
+        // otherwise, move the DIV from anywhere inside the DIV:
+        elmnt.onmousedown = dragMouseDown;
+    }
 
+    // drag functions
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
