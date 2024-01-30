@@ -13,6 +13,8 @@
     <script src="https://unpkg.com/d3-force-boundary@0.0.1/dist/d3-force-boundary.min.js"></script> <!--d3 force boundary add on-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.5/turf.min.js"></script><!--turf for d3 winding order-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://fonts.cdnfonts.com/css/iomanoid" rel="stylesheet"> <!--font-->
+    <link href="https://fonts.cdnfonts.com/css/metal-lord" rel="stylesheet"><!--font-->
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/translucent.css"/>
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css"/>
@@ -38,22 +40,68 @@
         // global functions
         let update_chart;
 
-        // global vars 
+        // global vars and objects
+        let animate_timeout;
         let current_projection;
         let simulation;
         let us_region = "Midwest"; 
-        let region = "California"; // "United States of America" "United Kingdom"
-        let display_region = "US"; // World
+        let region = "Finland"; // "United States of America" "United Kingdom"
+        let display_region = "World"; // World
         let grouped_region = false;
         let display_continent = "North America"; // need to manuually create list for continents
-        let pop_max = 2500000;
+        let pop_max = 2000000;
         let THEME = "dark";
         let current_year = 1983;
         let prev_year;
         let nodes = [];
         let links = [];
-        let display_bands = {"thrash": true, "black": false};
+        let display_bands = {"thrash": false, "black": true};
         let changes = false;
+        let image_display_range = [];
+        let image_height = 30;
+        let image_range_object = {getRange: function(){ // watch for lots of nodes
+                    let image_width_range = [];
+                    if(nodes.length < 15){
+                        image_width_range.push(vwu*6) // min
+                        image_width_range.push(vwu*12) // max
+                        return image_width_range;
+                    }
+                    else if(nodes.length < 30){
+                        image_width_range.push(vwu*5) // min
+                        image_width_range.push(vwu*11) // max
+                        return image_width_range;
+                    }
+                    else if(nodes.length < 50){
+                        image_width_range.push(vwu*4) // min
+                        image_width_range.push(vwu*10) // max
+                        return image_width_range;
+                    }
+                    else if(nodes.length < 70){
+                        image_width_range.push(vwu*3) // min
+                        image_width_range.push(vwu*9) // max
+                        return image_width_range;
+                    }
+                    else if(nodes.length < 100){
+                        image_width_range.push(vwu*3) // min
+                        image_width_range.push(vwu*8) // max
+                        return image_width_range;
+                    }
+                    else if(nodes.length < 150){
+                        image_width_range.push(vwu*3) // min
+                        image_width_range.push(vwu*7) // max
+                        return image_width_range;
+                    }
+                    else if(nodes.length < 200){
+                        image_width_range.push(vwu*3) // min
+                        image_width_range.push(vwu*6) // max
+                        return image_width_range;
+                    }
+                    else{
+                        image_width_range.push(vwu*3) // min
+                        image_width_range.push(vwu*7) // max
+                        return image_width_range;
+                    }
+        }}
         
         let projections = {getProjection: function(region, width, height, fixed_states){
                                     if(region == "Norway"){
@@ -128,11 +176,30 @@
 
            draw_map();
            update_chart();
-           
+           animate();
+
          }, false);
+
+         // animate function
+         function animate(){
+           
+            animate_timeout = setInterval(function(){
+                var year_display = document.getElementById("yearDisplay");
+                prev_year = current_year;
+                current_year += 1;
+                year_display.innerHTML = current_year;
+                update_graph_all_genres();
+                if(current_year == 2024){clearInterval(animate_timeout);}
+            }, 5000)
+         }
 
          /* EVENT HANDLERS*/
          function handleYear(event){
+
+            // stop animation
+            clearInterval(animate_timeout);
+
+            // get direction and handle
             var direction = event.target.id;
             var year_display = document.getElementById("yearDisplay");
 
@@ -263,16 +330,18 @@
                                             "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                             "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                                            "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                                            "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                            "image_size": band["image_size"]};
 
                     var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                    "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                    "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                    "image_size": band["image_size"]};
 
                     var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre};
+                                    "type":genre, "image_size": band["image_size"]};
                     nodes.push(new_base_node);
                     nodes.push(new_band_node);
                     links.push(new_link);
@@ -289,16 +358,18 @@
                                             "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                             "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                                            "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                                            "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                            "image_size": band["image_size"]};
 
                     var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                    "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                    "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                    "image_size": band["image_size"]};
 
                     var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre};
+                                    "type":genre, "image_size": band["image_size"]};
 
                     nodes.push(new_base_node);
                     nodes.push(new_band_node);
@@ -349,16 +420,18 @@
                                         "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                         "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                        "image_size": band["image_size"]};
 
                         var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                        "image_size": band["image_size"]};
 
                         var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre};
+                                    "type":genre, "image_size": band["image_size"]};
 
                         nodes.push(new_base_node);
                         nodes.push(new_band_node);
@@ -376,16 +449,18 @@
                                         "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                         "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                        "image_size": band["image_size"]};
 
                         var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
-                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1]};
+                        "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                        "image_size": band["image_size"]};
 
                         var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre};
+                                    "type":genre, "image_size": band["image_size"]};
 
                         nodes.push(new_base_node);
                         nodes.push(new_band_node);
@@ -626,13 +701,28 @@
         // https://stamen.com/forcing-functions-inside-d3-v4-forces-and-layout-transitions-f3e89ee02d12/
 
         // add band nodes (image) NOTE: need to give image nodes data before update function (for positions i think)
+        image_display_range = image_range_object.getRange();
         var node = svg.append("g").selectAll("images")
         .data(nodes, d => d.id)
         .enter().append('image')
         .attr("xlink:href", d => "logos_transparent/" + d.logo)
         .attr("height", function(d){
-                    if(d.nodeType=="base"){return 0;}
-                    return imageScale(nodes.length);
+            if(d.nodeType=="base"){return 0;}
+                    
+                    // image too small
+                    var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                    if(check_width < image_display_range[0]){
+                        var set_height = (image_display_range[0]/d.image_size[0]) * d.image_size[1];
+                        return set_height;
+                    }
+
+                    // image too big
+                    if(check_width > image_display_range[1]){
+                        var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
+                        return set_height;
+                    }
+
+                    return image_height;
         })
         .attr("class", "nodes")
         .call(d3.drag()
@@ -641,14 +731,14 @@
             .on("end", dragended));
 
         
-        //** Simulation settings
-        simulation = d3.forceSimulation(nodes)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+        //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
+        simulation = d3.forceSimulation(nodes).alphaDecay(0.5).velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
             .force("link", d3.forceLink(links).id(d => d.id).distance(function(d){
-                if(d.index%2 == 0){return 100;}
-                return 200;
+                if(d.index%2 == 0){return 80;}
+                return 120;
             }).strength(0.05))
-            .force("collide", d3.forceCollide().radius(30))
-            //.force("forceY", d3.forceY().strength(0.05))   // can't index check to alternate on nodes
+            .force("collide", d3.forceCollide().radius(33))
+            //.force("forceY", d3.forceY().strength(0.02))   // can't index check to alternate on nodes
             //.force("forceX", d3.forceX().strength(0.05))
             //.force('cluster', d3.forceCluster().centers(get_clusters(width, height)).strength(0.5))
             .force("boundary", forceBoundary(0, 0, plot_width, plot_height - 100).strength(0.005))
@@ -677,12 +767,48 @@
             
         // ticked function
         function ticked() {
-            
+            // source is base
             link
             .attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
+            .attr("x2", function(d){ // update target point to account for width/height
+
+                // image too small
+                var set_width = (image_height/d.image_size[1]) * d.image_size[0];
+                if(set_width < image_display_range[0]){
+                    var set_height = (image_display_range[0]/d.image_size[0]) * d.image_size[1];
+                    var set_width = image_display_range[0];
+                }
+                // image too big
+                else if(set_width > image_display_range[1]){
+                    var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
+                    var set_width = image_display_range[1];
+                }
+                else{
+                    var set_height = image_height;
+                }
+
+                return d.target.x + set_width/2;
+                
+            })
+            .attr("y2", function(d){
+               // image too small
+               var set_width = (image_height/d.image_size[1]) * d.image_size[0];
+                if(set_width < image_display_range[0]){
+                    var set_height = (image_display_range[0]/d.image_size[0]) * d.image_size[1];
+                    var set_width = image_display_range[0];
+                }
+                // image too big
+                else if(set_width > image_display_range[1]){
+                    var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
+                    var set_width = image_display_range[1];
+                }
+                else{
+                    var set_height = image_height;
+                }
+
+                return d.target.y + set_height;;
+            });
     
             node
             .attr("x", d => d.x)
@@ -698,6 +824,10 @@
         update_chart = function(){
             //console.log(nodes);
             //console.log(links);
+
+            // set image range (watch this, may need to adjust)
+            image_display_range = image_range_object.getRange();
+            //console.log(image_display_range);
 
             // Dont use join as messes with exit
             // Instead define seperate enter() amd exit() and use merge as below
@@ -762,10 +892,26 @@
                 .style("opacity", 0).transition().duration(3000).style("opacity", 1);
 
                 // resize
+                
                 node.data(nodes, d => d.id).attr("height", function(d){
                     if(d.nodeType=="base"){return 0;}
-                    return imageScale(nodes.length);
+                    
+                    // image too small
+                    var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                    if(check_width < image_display_range[0]){
+                        var set_height = (image_display_range[0]/d.image_size[0]) * d.image_size[1];
+                        return set_height;
+                    }
+
+                    // image too big
+                    if(check_width > image_display_range[1]){
+                        var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
+                        return set_height;
+                    }
+
+                    return image_height;
                 });
+                
             }
             
             // then give data
@@ -781,12 +927,29 @@
                 .attr("xlink:href", d => "logos_transparent/" + d.logo)
                 .attr("height", function(d){
                     if(d.nodeType=="base"){return 0;}
-                    return imageScale(nodes.length);
-                }).call(d3.drag()
+                    
+                    // image too small
+                    var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                    if(check_width < image_display_range[0]){
+                        var set_height = (image_display_range[0]/d.image_size[0]) * d.image_size[1];
+                        return set_height;
+                    }
+
+                    // image too big
+                    if(check_width > image_display_range[1]){
+                        var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
+                        return set_height;
+                    }
+
+                    return image_height;
+
+                })
+                .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
                 .on("end", dragended)).merge(node);
 
+            
             //**  links
 
             // update existing

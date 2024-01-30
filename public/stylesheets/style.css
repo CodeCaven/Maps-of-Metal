@@ -32,8 +32,15 @@ a {
 
 #controls{
   position:absolute;
-  top:0;
-  left:0;
+  top:50px;
+  left:50px;
   width:200px;
+  letter-spacing: 4px;
 }
+
+#genreHeader{
+  font-family: 'Metal Lord', sans-serif;
+  color: white;
+}
+
 
