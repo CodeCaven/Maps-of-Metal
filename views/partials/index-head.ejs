@@ -44,61 +44,61 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = "Midwest"; 
-        let region = "Finland"; // "United States of America" "United Kingdom"
-        let display_region = "World"; // World
-        let grouped_region = false;
+        let us_region = "Northeast"; 
+        let region = "Sweden"; // "United States of America" "United Kingdom"
+        let display_region = "US"; // World
+        let grouped_region = true;
         let display_continent = "North America"; // need to manuually create list for continents
-        let pop_max = 2000000;
+        let pop_max = 1500000;
         let THEME = "dark";
-        let current_year = 1983;
+        let current_year = 1980;
         let prev_year;
         let nodes = [];
         let links = [];
-        let display_bands = {"thrash": false, "black": true};
+        let display_bands = {"thrash": true, "black": false};
         let changes = false;
         let image_display_range = [];
         let image_height = 30;
         let image_range_object = {getRange: function(){ // watch for lots of nodes
                     let image_width_range = [];
-                    if(nodes.length < 15){
+                    if(nodes.length < 30){
                         image_width_range.push(vwu*6) // min
-                        image_width_range.push(vwu*12) // max
+                        image_width_range.push(vwu*15) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 30){
+                    else if(nodes.length < 60){
                         image_width_range.push(vwu*5) // min
-                        image_width_range.push(vwu*11) // max
+                        image_width_range.push(vwu*14) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 50){
+                    else if(nodes.length < 90){
                         image_width_range.push(vwu*4) // min
-                        image_width_range.push(vwu*10) // max
+                        image_width_range.push(vwu*13) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 70){
+                    else if(nodes.length < 120){
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*9) // max
-                        return image_width_range;
-                    }
-                    else if(nodes.length < 100){
-                        image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*8) // max
+                        image_width_range.push(vwu*12) // max
                         return image_width_range;
                     }
                     else if(nodes.length < 150){
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*7) // max
+                        image_width_range.push(vwu*11) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 200){
+                    else if(nodes.length < 180){
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*6) // max
+                        image_width_range.push(vwu*10) // max
+                        return image_width_range;
+                    }
+                    else if(nodes.length < 210){
+                        image_width_range.push(vwu*3) // min
+                        image_width_range.push(vwu*9) // max
                         return image_width_range;
                     }
                     else{
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*7) // max
+                        image_width_range.push(vwu*8) // max
                         return image_width_range;
                     }
         }}
@@ -117,6 +117,11 @@
                                 }
                             }
 
+        let views = {"California": {"cities": ["Los Angeles", "San Francisco", "Fresno", "San Diego"]},
+                    "Norway": {"cities":["Oslo", "Bergen"]},
+                    "Sweden": {"cities": ["Stockholm", "Umeå"],
+                    "Northeast":{"cities": ["New York", "Philadelphia", "Boston", "Pittsburgh", "Portland"]}}};
+
         // DOM loaded callback
 		document.addEventListener('DOMContentLoaded', function() {
 
@@ -126,6 +131,10 @@
 
             // natural earth country names
             // https://unstats.un.org/unsd/methodology/m49/
+
+            // HERE
+            // check naer mataron (us greec?)
+            // us regions views
 
            // log data
            console.log(thrash_bands);
@@ -337,7 +346,7 @@
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                     "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                    "image_size": band["image_size"]};
+                    "image_size": band["image_size"], "origin": band['origin']};
 
                     var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
@@ -365,7 +374,7 @@
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                     "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                    "image_size": band["image_size"]};
+                    "image_size": band["image_size"], "origin": band['origin']};
 
                     var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
@@ -427,7 +436,7 @@
                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                        "image_size": band["image_size"]};
+                        "image_size": band["image_size"], "origin": band['origin']};
 
                         var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
@@ -456,7 +465,7 @@
                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                        "image_size": band["image_size"]};
+                        "image_size": band["image_size"], "origin": band['origin']};
 
                         var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
@@ -524,13 +533,32 @@
             svg = create_light_filter(svg, "whitesmoke");
             svg = create_gradient_filter(svg, mapColour);
 
+            // scales
+            let radScale = d3.scaleSqrt()
+            .domain([pop_max, 10*pop_max])
+            .range([1*vhu, 3*vhu]).clamp(true);
+
+            let textScale = d3.scaleLinear()
+            .domain([100000, 5000000])
+            .range([1, 1.8]).clamp(true);
+
+            let imageScale = d3.scaleLinear()// using image range at the moment
+            .domain([1, 200])// number of nodes
+            .range([40, 15]).clamp(true); 
+
             /*** Filter Map  ***/ 
 
             // us counties and places
             if(display_region == "US"){
                 if(!(grouped_region)){
                     var display_states = us_counties.features.filter(prop => prop.properties.STATE == us_state_data[region]["fips_code"]);
-                    var places_points = world_places.features.filter(prop => prop.properties.ADM1NAME == region && prop.properties.POP_MAX > pop_max);
+                    try{ // look up cities
+                        var places_points = world_places.features.filter(prop => prop.properties.ADM1NAME == region);
+                        places_points = places_points.filter(prop => views[region]["cities"].includes(prop.properties.NAME));
+                    }
+                    catch{// use pop if not found
+                        var places_points = world_places.features.filter(prop => prop.properties.ADM1NAME == region && prop.properties.POP_MAX > pop_max);
+                    }
                     var display_boundary = us_states.features.filter(prop => prop.properties.NAME == region);
                 }
 
@@ -544,7 +572,14 @@
             else{ // world states and places
                 if(!(grouped_region)){
                     var display_states = world_states.features.filter(prop => prop.properties.admin == region);
-                    var places_points = world_places.features.filter(prop => prop.properties.ADM0NAME == region && prop.properties.POP_MAX > pop_max);
+                    try{ // look up cities
+                        var places_points = world_places.features.filter(prop => prop.properties.ADM0NAME == region);
+                        places_points = places_points.filter(prop => views[region]["cities"].includes(prop.properties.NAME));
+                    }
+                    catch{ // use pop max if not found
+                        var places_points = world_places.features.filter(prop => prop.properties.ADM0NAME == region && prop.properties.POP_MAX > pop_max);
+                    }
+                    
                     var display_boundary = world_boundaries.features.filter(prop => prop.properties.ADMIN == region);
                 }
                 // by continent (NEEDS TO BE IMPLEMNTED..dont run)
@@ -571,19 +606,6 @@
             const path = d3.geoPath().projection(current_projection);
             create_graph_all_genres(); //create initial graph (needed for image nodes)
 
-            // scales
-            var radScale = d3.scaleSqrt()
-            .domain([pop_max, 10*pop_max])
-            .range([1*vhu, 3*vhu]).clamp(true);
-
-            var textScale = d3.scaleLinear()
-            .domain([pop_max, 10*pop_max])
-            .range([1, 3]).clamp(true);
-
-            var imageScale = d3.scaleLinear()
-            .domain([1, 200])// number of nodes
-            .range([40, 15]).clamp(true); 
-
             
             // counties or states
             svg
@@ -595,11 +617,11 @@
             .attr("fill", mapColour)
             //.attr("fill","url(#middleCircleFill)")
             .attr("stroke", function(){
-                if(THEME == "dark"){return "white"}
-                return "white";
+                if(THEME == "dark"){return "black"}
+                return "black";
             })
             .attr("stroke-width", 1)
-            .attr("stroke-opacity", 0.5)
+            .attr("stroke-opacity", 0)
             .attr("class", "statearea");
 
             // boundaries
@@ -612,8 +634,8 @@
             .attr("fill", "none")
             //.attr("fill","url(#middleCircleFill)")
             .attr("stroke", function(){
-                if(THEME == "dark"){return "black"}
-                return "black"
+                if(THEME == "dark"){return "black";}
+                return "black";
             })
             .attr("stroke-width", 2)
             .attr("stroke-opacity", 0.5);
@@ -623,11 +645,10 @@
             .attr("class", "links")
             .selectAll("edges");
 
-            // add base nodes (circle) here so behind (not used at the moment)
+            // add base nodes (circle specular) here so behind 
             var base_node = svg.append("g")
             .attr("class", "nodes")
             .selectAll("bands");
-
 
             /*** place names **/
             var place_radius = 4;
@@ -649,8 +670,8 @@
             d3.selectAll("text").remove();
 
             // add background rects
-            const xMargin = 8
-            const yMargin = 4
+            const xMargin = 3;
+            const yMargin = 2;
             svg
             .selectAll("textareas")
             .data(places_points)
@@ -665,7 +686,7 @@
                 if(THEME == "dark"){return "white"}
                 return "white";
             })
-            .style("fill-opacity", 0.9)
+            .style("fill-opacity", 0.8)
             .attr('transform', function(d) {
                 return `translate(-${xMargin}, -${d.bbox.height * 0.8 + yMargin})`
                 });
@@ -702,27 +723,50 @@
 
         // add band nodes (image) NOTE: need to give image nodes data before update function (for positions i think)
         image_display_range = image_range_object.getRange();
+
         var node = svg.append("g").selectAll("images")
         .data(nodes, d => d.id)
         .enter().append('image')
         .attr("xlink:href", d => "logos_transparent/" + d.logo)
         .attr("height", function(d){
-            if(d.nodeType=="base"){return 0;}
+            if(d.nodeType=="base"){
+                d['height'] = 0;
+                return 0;}
                     
                     // image too small
                     var check_width = (image_height/d.image_size[1]) * d.image_size[0];
                     if(check_width < image_display_range[0]){
                         var set_height = (image_display_range[0]/d.image_size[0]) * d.image_size[1];
+                        d['height'] = set_height;
                         return set_height;
                     }
 
                     // image too big
                     if(check_width > image_display_range[1]){
                         var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
+                        d['height'] = set_height;
                         return set_height;
                     }
-
+                    d['height'] = image_height;
                     return image_height;
+        })  
+        .attr("width", function(d){ // only setting for collision detection
+            if(d.nodeType=="base"){
+                d['width'] = 0;
+                return 0;}
+                    
+                    // image too small
+                    var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                    if(check_width < image_display_range[0]){
+                        check_width = image_display_range[0];
+                    }
+
+                    // image too big
+                    if(check_width > image_display_range[1]){
+                        check_width = image_display_range[1];
+                    }
+                    d['width'] = check_width;
+                    return check_width;
         })
         .attr("class", "nodes")
         .call(d3.drag()
@@ -732,12 +776,17 @@
 
         
         //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
-        simulation = d3.forceSimulation(nodes).alphaDecay(0.5).velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+        simulation = d3.forceSimulation(nodes).alpha(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
             .force("link", d3.forceLink(links).id(d => d.id).distance(function(d){
-                if(d.index%2 == 0){return 80;}
+                if(d.index%2 == 0){return 60;}
+                if(d.index%3 == 0){return 80;}
+                if(d.index%4 == 0){return 100;}
                 return 120;
-            }).strength(0.05))
-            .force("collide", d3.forceCollide().radius(33))
+            }).strength(0.01))
+            .force("collide", d3.forceCollide().radius(33).strength(0.5))
+            //.force('collision', rectCollide().size(function(d){
+                //console.log(d);
+                //return [d.width,d.height]}))
             //.force("forceY", d3.forceY().strength(0.02))   // can't index check to alternate on nodes
             //.force("forceX", d3.forceX().strength(0.05))
             //.force('cluster', d3.forceCluster().centers(get_clusters(width, height)).strength(0.5))
@@ -822,7 +871,7 @@
 
         // global update chart (upate, enter, exit nodes and links)
         update_chart = function(){
-            //console.log(nodes);
+            console.log(nodes);
             //console.log(links);
 
             // set image range (watch this, may need to adjust)
@@ -908,8 +957,23 @@
                         var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
                         return set_height;
                     }
-
+                    
                     return image_height;
+                })
+                .attr("width", function(d){ // only setting for collision detection
+                    if(d.nodeType=="base"){return 0;}
+                            
+                            // image too small
+                            var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                            if(check_width < image_display_range[0]){
+                                check_width = image_display_range[0];
+                            }
+
+                            // image too big
+                            if(check_width > image_display_range[1]){
+                                check_width = image_display_range[1];
+                            }
+                            return check_width;
                 });
                 
             }
@@ -926,30 +990,53 @@
                 .attr("class", "nodes")
                 .attr("xlink:href", d => "logos_transparent/" + d.logo)
                 .attr("height", function(d){
-                    if(d.nodeType=="base"){return 0;}
+                    
+                    if(d.nodeType=="base"){
+                        d['height'] = 0;
+                        return 0;}
                     
                     // image too small
                     var check_width = (image_height/d.image_size[1]) * d.image_size[0];
                     if(check_width < image_display_range[0]){
                         var set_height = (image_display_range[0]/d.image_size[0]) * d.image_size[1];
+                        d['height'] = set_height;
                         return set_height;
                     }
 
                     // image too big
                     if(check_width > image_display_range[1]){
                         var set_height = (image_display_range[1]/d.image_size[0]) * d.image_size[1];
+                        d['height'] = set_height;
                         return set_height;
                     }
-
+                    d['height'] = image_height;
                     return image_height;
+                    
 
+                })
+                .attr("width", function(d){ // only setting for collision detection
+                    if(d.nodeType=="base"){
+                        d['width'] = 0;
+                        return 0;}
+                            
+                            // image too small
+                            var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                            if(check_width < image_display_range[0]){
+                                check_width = image_display_range[0];
+                            }
+
+                            // image too big
+                            if(check_width > image_display_range[1]){
+                                check_width = image_display_range[1];
+                            }
+                            d['width'] = check_width;
+                            return check_width;
                 })
                 .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
                 .on("end", dragended)).merge(node);
 
-            
             //**  links
 
             // update existing
@@ -1053,6 +1140,124 @@
     event.subject.fx = null;
     event.subject.fy = null;
   }
+
+  function rectCollide() {
+    var nodes,sizes,masses;
+    var strength = 5;
+    var iterations = 1;
+    var nodeCenterX;
+    var nodeMass;
+    var nodeCenterY;
+
+  function force() {
+
+    //console.log(sizes);
+
+    var node;
+      var i = -1;
+      while (++i < iterations){iterate();}
+    function iterate(){
+          var quadtree = d3.quadtree(nodes, xCenter, yCenter);
+          var j = -1;
+          while (++j < nodes.length){
+            node = nodes[j];
+            nodeMass = masses[j];
+            nodeCenterX = xCenter(node);
+            nodeCenterY = yCenter(node);
+            quadtree.visit(collisionDetection);
+            }
+        }
+
+    function collisionDetection(quad, x0, y0, x1, y1) {
+        var updated = false;
+        var data = quad.data;
+        if(data){
+          if (data.index > node.index) {
+
+            let xSize = (node.width + data.width) / 2;
+            let ySize = (node.height + data.height) / 2;
+            let dataCenterX = xCenter(data);
+            let dataCenterY = yCenter(data);
+            let dx = nodeCenterX - dataCenterX;
+            let dy = nodeCenterY - dataCenterY;
+            let absX = Math.abs(dx);
+            let absY = Math.abs(dy);
+            let xDiff = absX - xSize;
+            let yDiff = absY - ySize;
+
+            if(xDiff < 0 && yDiff < 0){
+              //collision has occurred
+               
+              //separation vector
+              let sx = xSize - absX;
+              let sy = ySize - absY;
+              if(sx < sy){
+                if(sx > 0){
+                  sy = 0;
+                }
+              }else{
+                if(sy > 0){
+                  sx = 0;
+                }
+              }
+              if (dx < 0){
+                sx = -sx;
+              }
+              if(dy < 0){
+                sy = -sy;
+              }
+
+              let distance = Math.sqrt(sx*sx + sy*sy);
+              let vCollisionNorm = {x: sx / distance, y: sy / distance};
+              let vRelativeVelocity = {x: data.vx - node.vx, y: data.vy - node.vy};
+              let speed = vRelativeVelocity.x * vCollisionNorm.x + vRelativeVelocity.y * vCollisionNorm.y;              
+              if (speed < 0){
+                      //negative speed = rectangles moving away
+              }else{
+                var collisionImpulse = 2*speed / (masses[data.index] + masses[node.index]);
+                if(Math.abs(xDiff) < Math.abs(yDiff)){
+                    //x overlap is less
+                    data.vx -= (collisionImpulse * masses[node.index] * vCollisionNorm.x);
+                    node.vx += (collisionImpulse * masses[data.index] * vCollisionNorm.x);
+                  }else{
+                    //y overlap is less
+                    data.vy -= (collisionImpulse * masses[node.index] * vCollisionNorm.y);
+                    node.vy += (collisionImpulse * masses[data.index] * vCollisionNorm.y);
+                  }
+                  
+                updated = true;
+              }
+            }
+          }
+        }
+      return updated
+  }
+  }//end force
+
+  function xCenter(d) { return d.x + d.vx + sizes[d.index][0] / 2 }
+  function yCenter(d) { return d.y + d.vy + sizes[d.index][1] / 2 }
+
+  force.initialize = function (_) {
+      sizes = (nodes = _).map(function(d){return [d.width,d.height]})
+      masses = sizes.map(function (d) { return d[0] * d[1] })
+  }
+
+force.size = function (_) {
+        return (arguments.length
+             ? (size = typeof _ === 'function' ? _ : constant(_), force)
+             : size)
+    }
+
+force.strength = function (_) {
+    return (arguments.length ? (strength = +_, force) : strength)
+    }
+
+force.iterations = function (_) {
+    return (arguments.length ? (iterations = +_, force) : iterations)
+    }
+
+return force
+}
 
     </script>
 </head>
