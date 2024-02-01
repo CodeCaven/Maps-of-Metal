@@ -74,7 +74,7 @@ function create_gradient_filter(svg, color){
 
         gradFill.append('stop')
         .attr('offset', '50%')
-        .style('stop-color', 'whitesmoke')//lightgrey
+        .style('stop-color', 'grey')//lightgrey
         .style('stop-opacity', 1);
 
         gradFill.append('stop')
@@ -242,5 +242,14 @@ force.iterations = function (_) {
 
 return force
 }
+
+let views = {"California": {"cities": ["Los Angeles", "San Francisco", "Long Beach", "Oakland"]},
+              "Norway": {"cities":["Oslo", "Bergen"]},
+              "Sweden": {"cities": ["Stockholm", "Umeå"]},
+              "Northeast":{"cities": ["New York", "Philadelphia", "Boston", "Pittsburgh", "Portland"]}};
+
+let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "start", "Oakland": "start",
+              "Oslo": "start", "Bergen": "end", "Stockholm": "start", "Umeå": "start", 
+              "New York": "start", "Philadelphia" : "end", "Boston": "start", "Pittsburgh": "start", "Portland": "end" };
 
 

@@ -44,14 +44,14 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = "Northeast"; 
-        let region = "Sweden"; // "United States of America" "United Kingdom"
+        let us_region = "Midwest"; 
+        let region = "California"; // "United States of America" "United Kingdom"
         let display_region = "US"; // World
-        let grouped_region = true;
+        let grouped_region = false;
         let display_continent = "North America"; // need to manuually create list for continents
         let pop_max = 1500000;
         let THEME = "dark";
-        let current_year = 1980;
+        let current_year = 1977;
         let prev_year;
         let nodes = [];
         let links = [];
@@ -117,11 +117,6 @@
                                 }
                             }
 
-        let views = {"California": {"cities": ["Los Angeles", "San Francisco", "Fresno", "San Diego"]},
-                    "Norway": {"cities":["Oslo", "Bergen"]},
-                    "Sweden": {"cities": ["Stockholm", "Umeå"],
-                    "Northeast":{"cities": ["New York", "Philadelphia", "Boston", "Pittsburgh", "Portland"]}}};
-
         // DOM loaded callback
 		document.addEventListener('DOMContentLoaded', function() {
 
@@ -131,10 +126,6 @@
 
             // natural earth country names
             // https://unstats.un.org/unsd/methodology/m49/
-
-            // HERE
-            // check naer mataron (us greec?)
-            // us regions views
 
            // log data
            console.log(thrash_bands);
@@ -199,7 +190,7 @@
                 year_display.innerHTML = current_year;
                 update_graph_all_genres();
                 if(current_year == 2024){clearInterval(animate_timeout);}
-            }, 5000)
+            }, 6000)
          }
 
          /* EVENT HANDLERS*/
@@ -529,7 +520,7 @@
                     "translate(" + margin.left + "," + margin.top + ")");
 
             let mapColour = "darkslategrey";
-            svg = create_light_filter(svg, "lightblue");
+            svg = create_light_filter(svg, "lightskyblue");
             svg = create_light_filter(svg, "whitesmoke");
             svg = create_gradient_filter(svg, mapColour);
 
@@ -540,14 +531,13 @@
 
             let textScale = d3.scaleLinear()
             .domain([100000, 5000000])
-            .range([1, 1.8]).clamp(true);
+            .range([0.5, 1]).clamp(true);
 
             let imageScale = d3.scaleLinear()// using image range at the moment
             .domain([1, 200])// number of nodes
             .range([40, 15]).clamp(true); 
 
             /*** Filter Map  ***/ 
-
             // us counties and places
             if(display_region == "US"){
                 if(!(grouped_region)){
@@ -565,7 +555,15 @@
                 // by region Northeast etc
                 if(grouped_region){
                     var display_states = us_counties.features.filter(prop => in_us_region_fips(prop.properties.STATE));
-                    var places_points = world_places.features.filter(prop => in_us_region_name(prop.properties.ADM1NAME) && prop.properties.POP_MAX > pop_max);
+                    try{
+                        var places_points = world_places.features.filter(prop => in_us_region_name(prop.properties.ADM1NAME));
+                        places_points = places_points.filter(prop => views[us_region]["cities"].includes(prop.properties.NAME));
+                     
+                    }  
+                    catch{
+                        var places_points = world_places.features.filter(prop => in_us_region_name(prop.properties.ADM1NAME) && prop.properties.POP_MAX > pop_max);
+                    }
+                    
                     var display_boundary = us_states.features.filter(prop => in_us_region_name(prop.properties.NAME));
                 }
             }   
@@ -617,11 +615,11 @@
             .attr("fill", mapColour)
             //.attr("fill","url(#middleCircleFill)")
             .attr("stroke", function(){
-                if(THEME == "dark"){return "black"}
-                return "black";
+                if(THEME == "dark"){return "url(#middleCircleFill)"}
+                return "url(#middleCircleFill)";
             })
-            .attr("stroke-width", 1)
-            .attr("stroke-opacity", 0)
+            .attr("stroke-width", 2)
+            .attr("stroke-opacity", 0.5)
             .attr("class", "statearea");
 
             // boundaries
@@ -634,8 +632,8 @@
             .attr("fill", "none")
             //.attr("fill","url(#middleCircleFill)")
             .attr("stroke", function(){
-                if(THEME == "dark"){return "black";}
-                return "black";
+                if(grouped_region){return "black";}
+                return "url(#middleCircleFill)";
             })
             .attr("stroke-width", 2)
             .attr("stroke-opacity", 0.5);
@@ -652,6 +650,7 @@
 
             /*** place names **/
             var place_radius = 4;
+            var deltaX = 2.5*vwu;
 
             // add first for bounding box
             svg
@@ -659,10 +658,16 @@
             .data(places_points)
             .enter()
             .append("text")
-            .attr('dy', d => -2*radScale(d.properties.POP_MAX)) //-2*radScale(d.properties.POP_MAX
+            //.attr('dy', d => -5) //-2*radScale(d.properties.POP_MAX
+            .attr("dx", function(d){
+                if(anchors[d.properties.NAME] == "start"){
+                    return deltaX;
+                };
+                return -1*deltaX; // end
+            })
             .style('font-size', d => textScale(d.properties.POP_MAX)+"rem")
             .attr("letter-spacing", "2px")
-            .attr("text-anchor", "start")
+            .attr("text-anchor", "end")
             .text(d => d.properties.NAME)
             .call(getBB);
 
@@ -678,8 +683,13 @@
             .enter()
             .append("rect")
             .attr("class", "maprect")
-            .attr("x", d => current_projection(d.geometry.coordinates)[0])
-            .attr("y", d => current_projection(d.geometry.coordinates)[1] -2*radScale(d.properties.POP_MAX))
+            .attr("x", function(d){
+                if(anchors[d.properties.NAME] == "start"){
+                    return current_projection(d.geometry.coordinates)[0] + deltaX;
+                };
+                return current_projection(d.geometry.coordinates)[0]  - deltaX - (d.bbox.width);
+            })
+            .attr("y", d => current_projection(d.geometry.coordinates)[1])
             .attr("width", d => d.bbox.width + 2 * xMargin)
             .attr("height", d => d.bbox.height + 2 * yMargin)
             .style("fill", function(){
@@ -699,7 +709,12 @@
             .append("text")
             .attr("x", d => current_projection(d.geometry.coordinates)[0])
             .attr("y", d => current_projection(d.geometry.coordinates)[1])
-            .attr('dy', d => -2*radScale(d.properties.POP_MAX))
+            .attr("dx", function(d){
+                if(anchors[d.properties.NAME] == "start"){
+                    return deltaX;
+                };
+                return -1*deltaX; // end
+            })
             .attr("stroke", function(){
                 if(THEME == "dark"){return "black"}
                 return "black";
@@ -710,7 +725,7 @@
             })
             .style('font-size', d => textScale(d.properties.POP_MAX)+"rem")
             .attr("letter-spacing", "2px")
-            .attr("text-anchor", "start")
+            .attr("text-anchor", d => anchors[d.properties.NAME])
             .text(d => d.properties.NAME);
             
         /* FORCE SIMULATION */
@@ -776,14 +791,14 @@
 
         
         //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
-        simulation = d3.forceSimulation(nodes).alpha(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+        simulation = d3.forceSimulation(nodes).velocityDecay(0.7)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
             .force("link", d3.forceLink(links).id(d => d.id).distance(function(d){
-                if(d.index%2 == 0){return 60;}
+                if(d.index%2 == 0){return 100;}
                 if(d.index%3 == 0){return 80;}
-                if(d.index%4 == 0){return 100;}
+                if(d.index%4 == 0){return 60;}
                 return 120;
             }).strength(0.01))
-            .force("collide", d3.forceCollide().radius(33).strength(0.5))
+            .force("collide", d3.forceCollide().radius(35).strength(0.5))
             //.force('collision', rectCollide().size(function(d){
                 //console.log(d);
                 //return [d.width,d.height]}))
@@ -792,26 +807,6 @@
             //.force('cluster', d3.forceCluster().centers(get_clusters(width, height)).strength(0.5))
             .force("boundary", forceBoundary(0, 0, plot_width, plot_height - 100).strength(0.005))
             .on("tick", ticked);
-
-        // places
-        /*
-        svg
-            .selectAll("places")
-            .data(places_points)
-            .enter()
-            .append("circle")
-            .attr("cx", d => current_projection(d.geometry.coordinates)[0])
-            .attr("cy", d => current_projection(d.geometry.coordinates)[1])
-            .attr("r", function(d){
-                return radScale(d.properties.POP_MAX);
-            })
-            .attr("filter", "url(#specular)")
-            .attr("stroke", "white")
-            .attr("fill", "darkslateblue")
-            .attr("stroke-width", 3)
-            .attr("fill-opacity", 1)
-            .attr("stroke-opacity", 0.7);
-        */
         
             
         // ticked function
@@ -871,7 +866,7 @@
 
         // global update chart (upate, enter, exit nodes and links)
         update_chart = function(){
-            console.log(nodes);
+            //console.log(nodes);
             //console.log(links);
 
             // set image range (watch this, may need to adjust)
@@ -889,14 +884,14 @@
             // update existing nodes
             if(changes){
                 base_node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
             }
 
             // give back data
             base_node = base_node.data(nodes, d => d.id);
 
             // exit nodes
-            base_node.exit().transition().duration(1000).style("opacity", 0).remove();
+            base_node.exit().transition().duration(2000).style("opacity", 0).remove();
 
             // enter new nodes
             base_node = base_node
@@ -921,7 +916,7 @@
                     }
 
                     if(d.type == "thrash"){
-                        return "url(#specularlightblue)";
+                        return "url(#specularlightskyblue)";
                     }
                 
                 })
@@ -938,7 +933,7 @@
 
                 // transition
                 node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
 
                 // resize
                 
@@ -982,7 +977,7 @@
             node = node.data(nodes, d => d.id);
             
             // exit nodes
-            node.exit().transition().duration(1000).style("opacity", 0).remove();
+            node.exit().transition().duration(2000).style("opacity", 0).remove();
             
             // enter new nodes
             node = node
@@ -1042,14 +1037,14 @@
             // update existing
             if(changes){
                 link.data(links, function(d) { return d.source.id + "-" + d.target.id; })
-                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
             }
             
             // then give back data
             link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
 
             // exit links
-            link.exit().transition().duration(1000).style("opacity", 0).remove();
+            link.exit().transition().duration(2000).style("opacity", 0).remove();
             
             // enter new links
             link = link
@@ -1062,7 +1057,7 @@
                     }
 
                     if(d.type== "thrash"){
-                        return "lightblue";
+                        return "lightskyblue";
                     }
                 })
                 .attr("stroke-width", 2)
