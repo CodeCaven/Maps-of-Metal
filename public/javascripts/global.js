@@ -243,13 +243,23 @@ force.iterations = function (_) {
 return force
 }
 
-let views = {"California": {"cities": ["Los Angeles", "San Francisco", "Long Beach", "Oakland"]},
+let views = {"California": {"cities": ["Los Angeles", "San Francisco"]},
               "Norway": {"cities":["Oslo", "Bergen"]},
               "Sweden": {"cities": ["Stockholm", "Umeå"]},
-              "Northeast":{"cities": ["New York", "Philadelphia", "Boston", "Pittsburgh", "Portland"]}};
+              "Scandinavia": {"cities": ["Stockholm", "Oslo", "Copenhagen", "Helsinki"]},
+              "Northeast":{"cities": ["New York City", "Boston"]},
+              "Germany":{"cities": ["Munich", "Dresden", "Frankfurt"]},
+              "Italy":{"cities": ["Rome", "Milan"]},
+              "South": {"cities": ["Houston", "Dallas", "Richmond", "Miami", "Tampa", "New Orleans", "Austin"]}};
 
 let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "start", "Oakland": "start",
-              "Oslo": "start", "Bergen": "end", "Stockholm": "start", "Umeå": "start", 
-              "New York": "start", "Philadelphia" : "end", "Boston": "start", "Pittsburgh": "start", "Portland": "end" };
+              "Oslo": "middle", "Bergen": "end", "Stockholm": "middle", "Umeå": "start", 
+              "New York City": "start", "Philadelphia" : "start", "Boston": "start", "Pittsburgh": "start", "Portland": "start" ,
+               "Hartford":"start", "Trenton": "end", "Houston" : "start", "Dallas" : "start", "Atlanta": "start", "Richmond" : "start", 
+               "Miami" : "start", "Tampa" : "end", "New Orleans": "start", "Austin": "end", 
+                "Copenhagen":"middle", "Helsinki":"middle", "Munich":"middle", "Dresden":"middle", "Frankfurt":"middle",
+                "Rome":"middle", "Milan":"middle", "Naples":"middle"};
+
+let world_regions = {"Scandinavia" : ["Sweden", "Norway", "Finland", "Denmark"]};
 
 

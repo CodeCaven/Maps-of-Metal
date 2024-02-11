@@ -33,7 +33,7 @@ a {
 #controls{
   position:absolute;
   top:50px;
-  left:50px;
+  left:150px;
   width:200px;
   letter-spacing: 4px;
 }
@@ -41,6 +41,19 @@ a {
 #genreHeader{
   font-family: 'Metal Lord', sans-serif;
   color: white;
+}
+
+.banner{
+  font-family: 'Permanent Marker', sans-serif;
+  font-weight:600;
+  position:absolute;
+  top:50px;
+  left:350px;
+  width:200px;
+  letter-spacing: 4px;
+  font-size: 40px;
+  color: gold;
+  text-shadow: 2px 2px gray;
 }
 
 

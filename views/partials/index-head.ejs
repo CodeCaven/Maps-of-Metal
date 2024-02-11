@@ -15,6 +15,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="https://fonts.cdnfonts.com/css/iomanoid" rel="stylesheet"> <!--font-->
     <link href="https://fonts.cdnfonts.com/css/metal-lord" rel="stylesheet"><!--font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Honk"><!--Google font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Permanent+Marker"><!--Google font-->
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/translucent.css"/>
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css"/>
@@ -44,78 +46,93 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = "Midwest"; 
-        let region = "California"; // "United States of America" "United Kingdom"
-        let display_region = "US"; // World
+        let us_region = "South"; 
+        let world_region = "Scandinavia"; 
+        let region = "Italy"; // "United States of America" "United Kingdom"
+        let display_region = "World"; // World
         let grouped_region = false;
         let display_continent = "North America"; // need to manuually create list for continents
         let pop_max = 1500000;
         let THEME = "dark";
-        let current_year = 1977;
+        let current_year = 1978;
         let prev_year;
         let nodes = [];
         let links = [];
-        let display_bands = {"thrash": true, "black": false};
+        let display_bands = {"thrash": false, "black": true};
         let changes = false;
         let image_display_range = [];
         let image_height = 30;
+        var timeout = 3500;
         let image_range_object = {getRange: function(){ // watch for lots of nodes
                     let image_width_range = [];
                     if(nodes.length < 30){
                         image_width_range.push(vwu*6) // min
-                        image_width_range.push(vwu*15) // max
+                        image_width_range.push(vwu*10) // max
                         return image_width_range;
                     }
                     else if(nodes.length < 60){
                         image_width_range.push(vwu*5) // min
-                        image_width_range.push(vwu*14) // max
+                        image_width_range.push(vwu*9) // max
                         return image_width_range;
                     }
                     else if(nodes.length < 90){
                         image_width_range.push(vwu*4) // min
-                        image_width_range.push(vwu*13) // max
+                        image_width_range.push(vwu*8) // max
                         return image_width_range;
                     }
                     else if(nodes.length < 120){
-                        image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*12) // max
+                        image_width_range.push(vwu*4) // min
+                        image_width_range.push(vwu*8) // max
                         return image_width_range;
                     }
                     else if(nodes.length < 150){
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*11) // max
+                        image_width_range.push(vwu*8) // max
                         return image_width_range;
                     }
                     else if(nodes.length < 180){
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*10) // max
+                        image_width_range.push(vwu*7) // max
                         return image_width_range;
                     }
                     else if(nodes.length < 210){
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*9) // max
+                        image_width_range.push(vwu*6) // max
                         return image_width_range;
                     }
                     else{
                         image_width_range.push(vwu*3) // min
-                        image_width_range.push(vwu*8) // max
+                        image_width_range.push(vwu*5) // max
                         return image_width_range;
                     }
         }}
         
         let projections = {getProjection: function(region, width, height, fixed_states){
-                                    if(region == "Norway"){
-                                        return d3.geoMercator().scale(900)
-                                        .center([10.75224540, 65.91386880])
-                                        .translate([width/2, height/2]);
-                                    }
-                                    else{
-                                        return d3.geoMercator()
-                                            .fitSize([width,height],{"type": "FeatureCollection","features":fixed_states});
-                                    }
-                                
-                                }
-                            }
+                    let padding = 20;
+                    if(region == "Norway"){
+                        return d3.geoMercator().scale(900)
+                        .center([10.75224540, 65.91386880]) // long, lat
+                        .translate([width/2, height/2]);
+                    }
+                    if(region == "Scandinavia"){
+                        return d3.geoMercator().scale(700)
+                        .center([12.75224540, 64.91386880])
+                        .translate([width/2, height/2]);
+                    }
+                    else if(region == "World"){
+                        return d3.geoMercator().scale(200)
+                        .center([39.00, 34.00])
+                        .translate([width/2, height/2]);
+                            //.fitSize([width,height],{"type": "FeatureCollection","features":fixed_states});
+                    }
+                    else{ // fitextent sets translate and scale, fitsize is shortcut for fitextent with top. left 0. 0 (cant use with padding)
+                        return d3.geoMercator()
+                            .fitExtent([[padding, padding], [width-padding,height-padding]],{"type": "FeatureCollection","features":fixed_states});
+                            //.fitSize([width,height],{"type": "FeatureCollection","features":fixed_states});
+                    }// will need to tinker with South
+                
+                }
+        }
 
         // DOM loaded callback
 		document.addEventListener('DOMContentLoaded', function() {
@@ -140,6 +157,14 @@
            console.log(metal_continents);
            console.log(us_state_data);
 
+           // umique cities
+           let unique_cities = world_places.features.map(prop => prop.properties.NAME_EN);
+           unique_cities.sort();
+           console.log(unique_cities);
+
+           // set New Mexico to South (change in data!)
+           us_state_data["New Mexico"]["region"] = "South";
+
            // global units
            vhu = parseFloat(window.innerHeight/100);
            vwu = parseFloat(window.innerWidth/100);
@@ -159,7 +184,12 @@
                 document.getElementById("regionDisplay").innerHTML = region;
            }
            else{// will need to update for world continents
-                document.getElementById("regionDisplay").innerHTML = "US " + us_region;
+                if(display_region == "US"){
+                    document.getElementById("regionDisplay").innerHTML = "US " + us_region;
+                }
+                else{
+                    document.getElementById("regionDisplay").innerHTML = world_region;
+                }
            }
 
            // init draggable controls
@@ -176,9 +206,39 @@
 
            draw_map();
            update_chart();
-           animate();
+           
+           animate_timeout = setInterval(myFunction, timeout);
+           //animate();
 
          }, false);
+
+         // varying time interval animation
+         var myFunction = function(){
+            clearInterval(animate_timeout);
+            if(timeout == 0){
+                timeout = 3000;
+                return;} // stop from handle year
+            if(current_year == 2024){
+                clearInterval(animate_timeout);
+                return;}
+            // update the map
+            var year_display = document.getElementById("yearDisplay");
+            prev_year = current_year;
+            current_year += 1;
+            year_display.innerHTML = current_year;
+            update_graph_all_genres();
+            //if(timeout <= 4500){timeout += 500;}
+            
+            if(current_year >= 2009 && current_year <= 2012){timeout = 2000;}
+            else{timeoout = 3500;}
+            if(current_year >= 2014){timeout = 2000;}
+            //else if(current_year >= 2020){timeout = 10000;}
+            //else{timeout = 10000;}
+            //if(current_year == 1985 || current_year == 1987){timeout = 3000;}
+            animate_timeout = setInterval(myFunction, timeout);
+        }
+       
+        
 
          // animate function
          function animate(){
@@ -190,13 +250,14 @@
                 year_display.innerHTML = current_year;
                 update_graph_all_genres();
                 if(current_year == 2024){clearInterval(animate_timeout);}
-            }, 6000)
+            }, 8000)
          }
 
          /* EVENT HANDLERS*/
          function handleYear(event){
 
             // stop animation
+            timeout = 0;
             clearInterval(animate_timeout);
 
             // get direction and handle
@@ -286,6 +347,11 @@
             return false;
          }
 
+         // check if country in world region
+         function in_world_region(country){
+            return world_regions[world_region].includes(country);
+         }
+
          // check if us state in region
          function in_us_region_name(state){
             for(let i in us_state_data){
@@ -331,24 +397,25 @@
                                             "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                             "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                                            "image_size": band["image_size"]};
+                                            "image_size": band["image_size"], "name": band["name"]};
 
                     var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                     "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                    "image_size": band["image_size"], "origin": band['origin']};
+                    "image_size": band["image_size"], "origin": band['origin'], "name": band["name"]};
 
                     var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre, "image_size": band["image_size"]};
+                                    "type":genre, "image_size": band["image_size"], "name": band["name"]};
                     nodes.push(new_base_node);
                     nodes.push(new_band_node);
                     links.push(new_link);
                 }
 
-                // World (will need to update for continent grouping)
-                if(display_region == "World" && band['loc']['country'] == region){
+                // World
+                if((!(grouped_region) && display_region == "World" && band['loc']['country'] == region) || 
+                        (grouped_region && display_region == "World" && in_world_region (band['loc']['country']))){
 
                     changes = true;
 
@@ -359,17 +426,17 @@
                                             "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                             "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                             "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                                            "image_size": band["image_size"]};
+                                            "image_size": band["image_size"], "name": band["name"]};
 
                     var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                     "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                     "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                     "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                    "image_size": band["image_size"], "origin": band['origin']};
+                    "image_size": band["image_size"], "origin": band['origin'], "name": band["name"]};
 
                     var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre, "image_size": band["image_size"]};
+                                    "type":genre, "image_size": band["image_size"], "name": band["name"]};
 
                     nodes.push(new_base_node);
                     nodes.push(new_band_node);
@@ -395,8 +462,9 @@
                     changes = true;
                 }
 
-                // update for continents
-                if(display_region == "World" && band['loc']['country'] == region){
+                // World
+                if((!(grouped_region) && display_region == "World" && band['loc']['country'] == region) || 
+                        (grouped_region && display_region == "World" && in_world_region (band['loc']['country']))){
                     changes = true;
                 }
             }
@@ -421,17 +489,17 @@
                                         "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                                        "image_size": band["image_size"]};
+                                        "image_size": band["image_size"], "name": band["name"]};
 
                         var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                        "image_size": band["image_size"], "origin": band['origin']};
+                        "image_size": band["image_size"], "origin": band['origin'], "name": band["name"]};
 
                         var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre, "image_size": band["image_size"]};
+                                    "type":genre, "image_size": band["image_size"], "name": band["name"]};
 
                         nodes.push(new_base_node);
                         nodes.push(new_band_node);
@@ -439,8 +507,9 @@
                     }
                 }
 
-                // World (will need to update for grouped continents)
-                if(display_region == "World" && band['loc']['country'] == region){
+                // World
+                if((!(grouped_region) && display_region == "World" && band['loc']['country'] == region) || 
+                        (grouped_region && display_region == "World" && in_world_region (band['loc']['country']))){
                     if(thrash_indexes.includes(band['index'])){
 
                         // create nodes (2 for eaach band) and link
@@ -450,23 +519,54 @@
                                         "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
                                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                                        "image_size": band["image_size"]};
+                                        "image_size": band["image_size"], "name": band["name"]};
 
                         var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
                         "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
                         "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
                         "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
-                        "image_size": band["image_size"], "origin": band['origin']};
+                        "image_size": band["image_size"], "origin": band['origin'], "name": band["name"]};
 
                         var new_link = {"source":"base" + genre + band['index'], 
                                     "target":"band" + genre + band['index'],
-                                    "type":genre, "image_size": band["image_size"]};
+                                    "type":genre, "image_size": band["image_size"], "name": band["name"]};
 
                         nodes.push(new_base_node);
                         nodes.push(new_band_node);
                         links.push(new_link);
                     }
                 }
+            }
+         }
+
+         //** create a graph of nodes and edges by current year (initial)
+         function create_world_graph(projection, lookup, bands, genre){
+
+            // current year thrash indexes
+            for(let band of bands){
+                // create nodes (2 for eaach band) and link
+                var new_base_node = {"id": "base" + genre + band['index'], "type":genre, "nodeType":"base",
+                                "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
+                                "fx": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
+                                "fy": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
+                                "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                "image_size": band["image_size"]};
+
+                var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
+                "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
+                "x": projection([band['loc']['longitude'], band['loc']['latitude']])[0],
+                "y": projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                "image_size": band["image_size"], "origin": band['origin']};
+
+                var new_link = {"source":"base" + genre + band['index'], 
+                            "target":"band" + genre + band['index'],
+                            "type":genre, "image_size": band["image_size"]};
+
+                nodes.push(new_base_node);
+                nodes.push(new_band_node);
+                links.push(new_link);
+                
             }
          }
 
@@ -477,8 +577,9 @@
             var plot_width = plot_area.offsetWidth;
 
             // set the dimensions and margins of the plot 
+            // NOTE: dont use for map margind, use padding var in projections instead
             var margin = {top: 0, 
-                        right: 0, 
+                        right:0, 
                         bottom: 0, 
                         left: 0};
 
@@ -522,6 +623,7 @@
             let mapColour = "darkslategrey";
             svg = create_light_filter(svg, "lightskyblue");
             svg = create_light_filter(svg, "whitesmoke");
+            svg = create_light_filter(svg, "darkrgray");
             svg = create_gradient_filter(svg, mapColour);
 
             // scales
@@ -531,7 +633,7 @@
 
             let textScale = d3.scaleLinear()
             .domain([100000, 5000000])
-            .range([0.5, 1]).clamp(true);
+            .range([0.8, 1]).clamp(true);
 
             let imageScale = d3.scaleLinear()// using image range at the moment
             .domain([1, 200])// number of nodes
@@ -557,7 +659,7 @@
                     var display_states = us_counties.features.filter(prop => in_us_region_fips(prop.properties.STATE));
                     try{
                         var places_points = world_places.features.filter(prop => in_us_region_name(prop.properties.ADM1NAME));
-                        places_points = places_points.filter(prop => views[us_region]["cities"].includes(prop.properties.NAME));
+                        places_points = places_points.filter(prop => views[us_region]["cities"].includes(prop.properties.NAME_EN));
                      
                     }  
                     catch{
@@ -572,7 +674,7 @@
                     var display_states = world_states.features.filter(prop => prop.properties.admin == region);
                     try{ // look up cities
                         var places_points = world_places.features.filter(prop => prop.properties.ADM0NAME == region);
-                        places_points = places_points.filter(prop => views[region]["cities"].includes(prop.properties.NAME));
+                        places_points = places_points.filter(prop => views[region]["cities"].includes(prop.properties.NAME_EN));
                     }
                     catch{ // use pop max if not found
                         var places_points = world_places.features.filter(prop => prop.properties.ADM0NAME == region && prop.properties.POP_MAX > pop_max);
@@ -580,13 +682,27 @@
                     
                     var display_boundary = world_boundaries.features.filter(prop => prop.properties.ADMIN == region);
                 }
-                // by continent (NEEDS TO BE IMPLEMNTED..dont run)
+
+                // by world region (scandanavia, europe)
                 if(grouped_region){
-                    var display_states = world_states.features.filter(prop => in_continent(prop.properties.admin));
-                    var places_points = world_places.features.filter(prop => in_continent(prop.properties.ADM0NAME) && prop.properties.POP_MAX > pop_max);
+                    var display_states = world_states.features.filter(prop => in_world_region(prop.properties.admin));
+                    try{
+                        var places_points = world_places.features.filter(prop => in_world_region(prop.properties.ADM0NAME));
+                        places_points = places_points.filter(prop => views[world_region]["cities"].includes(prop.properties.NAME_EN));
+                     
+                    }  
+                    catch(e){
+                        var places_points = world_places.features.filter(prop => in_world_region(prop.properties.ADM0NAME) && prop.properties.POP_MAX > pop_max);
+                    }
+
+                    var display_boundary = world_boundaries.features.filter(prop => in_world_region(prop.properties.ADMIN));
                 }
             }
-
+            
+            // world
+            //var display_states = world_states.features.filter(prop => prop.properties.admin != "Greenland");
+            //var display_boundary = world_boundaries.features.filter(prop => prop.properties.ADMIN != "Greenland");
+                    
             // turf unwind features for plot
             var fixed_states = display_states.map(function(f) {
                     return turf.rewind(f,{reverse:true});
@@ -598,11 +714,30 @@
             });
 
             // get and set current projection
-            current_projection = projections.getProjection(region ,width, height, fixed_states);
+            if(display_region == "World"){
+                if(grouped_region){
+                    current_projection = projections.getProjection(world_region ,width, height, fixed_states);
+                }
+                else{
+                    current_projection = projections.getProjection(region ,width, height, fixed_states, margin);
+                }
+            }
+            else{ // US
+                if(grouped_region){
+                    current_projection = projections.getProjection(us_region ,width, height, fixed_states);
+                }
+                else{
+                    current_projection = projections.getProjection(region ,width, height, fixed_states, margin);
+                }
+            }
             
             // path and graph
             const path = d3.geoPath().projection(current_projection);
             create_graph_all_genres(); //create initial graph (needed for image nodes)
+
+            // world graphs
+            //create_world_graph(current_projection, thrash_lookup, thrash_bands, "thrash");
+            //create_world_graph(current_projection, black_lookup, black_bands, "black");
 
             
             // counties or states
@@ -618,7 +753,7 @@
                 if(THEME == "dark"){return "url(#middleCircleFill)"}
                 return "url(#middleCircleFill)";
             })
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 1)
             .attr("stroke-opacity", 0.5)
             .attr("class", "statearea");
 
@@ -635,7 +770,7 @@
                 if(grouped_region){return "black";}
                 return "url(#middleCircleFill)";
             })
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 1)
             .attr("stroke-opacity", 0.5);
             
             // add links (here so behind other elements)
@@ -649,7 +784,7 @@
             .selectAll("bands");
 
             /*** place names **/
-            var place_radius = 4;
+            var place_radius = 20;
             var deltaX = 2.5*vwu;
 
             // add first for bounding box
@@ -658,17 +793,28 @@
             .data(places_points)
             .enter()
             .append("text")
-            //.attr('dy', d => -5) //-2*radScale(d.properties.POP_MAX
             .attr("dx", function(d){
-                if(anchors[d.properties.NAME] == "start"){
+                if(anchors[d.properties.NAME_EN] == "start"){
                     return deltaX;
+                };
+                if(anchors[d.properties.NAME_EN] == "middle"){
+                    return 0;
                 };
                 return -1*deltaX; // end
             })
+            .attr("dy", function(d){
+                if(anchors[d.properties.NAME_EN] == "start"){
+                    return 0;
+                };
+                if(anchors[d.properties.NAME_EN] == "middle"){
+                    return 1.5*place_radius;
+                };
+                return 0; // end
+            })
             .style('font-size', d => textScale(d.properties.POP_MAX)+"rem")
             .attr("letter-spacing", "2px")
-            .attr("text-anchor", "end")
-            .text(d => d.properties.NAME)
+            //.attr("text-anchor", "end")
+            .text(d => d.properties.NAME_EN)
             .call(getBB);
 
             // remove the text elements (watch for other text elements)
@@ -684,12 +830,23 @@
             .append("rect")
             .attr("class", "maprect")
             .attr("x", function(d){
-                if(anchors[d.properties.NAME] == "start"){
+                if(anchors[d.properties.NAME_EN] == "start"){
                     return current_projection(d.geometry.coordinates)[0] + deltaX;
+                };
+                if(anchors[d.properties.NAME_EN] == "middle"){
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2;
                 };
                 return current_projection(d.geometry.coordinates)[0]  - deltaX - (d.bbox.width);
             })
-            .attr("y", d => current_projection(d.geometry.coordinates)[1])
+            .attr("y", function(d){
+                if(anchors[d.properties.NAME_EN] == "start"){
+                    return current_projection(d.geometry.coordinates)[1];
+                };
+                if(anchors[d.properties.NAME_EN] == "middle"){
+                    return current_projection(d.geometry.coordinates)[1] + (1.5*place_radius);
+                };
+                return current_projection(d.geometry.coordinates)[1]
+            })
             .attr("width", d => d.bbox.width + 2 * xMargin)
             .attr("height", d => d.bbox.height + 2 * yMargin)
             .style("fill", function(){
@@ -710,10 +867,22 @@
             .attr("x", d => current_projection(d.geometry.coordinates)[0])
             .attr("y", d => current_projection(d.geometry.coordinates)[1])
             .attr("dx", function(d){
-                if(anchors[d.properties.NAME] == "start"){
+                if(anchors[d.properties.NAME_EN] == "start"){
                     return deltaX;
                 };
+                if(anchors[d.properties.NAME_EN] == "middle"){
+                    return 0;
+                };
                 return -1*deltaX; // end
+            })
+            .attr("dy", function(d){
+                if(anchors[d.properties.NAME_EN] == "start"){
+                    return 0;
+                };
+                if(anchors[d.properties.NAME_EN] == "middle"){
+                    return 1.5*place_radius ;
+                };
+                return 0; // end
             })
             .attr("stroke", function(){
                 if(THEME == "dark"){return "black"}
@@ -725,9 +894,11 @@
             })
             .style('font-size', d => textScale(d.properties.POP_MAX)+"rem")
             .attr("letter-spacing", "2px")
-            .attr("text-anchor", d => anchors[d.properties.NAME])
-            .text(d => d.properties.NAME);
-            
+            .attr("text-anchor", d => anchors[d.properties.NAME_EN])
+            .text(d => d.properties.NAME_EN);
+         
+        
+         
         /* FORCE SIMULATION */
 
         // Create a simulation with several forces.
@@ -744,9 +915,15 @@
         .enter().append('image')
         .attr("xlink:href", d => "logos_transparent/" + d.logo)
         .attr("height", function(d){
+
             if(d.nodeType=="base"){
                 d['height'] = 0;
                 return 0;}
+
+            if(d.name == "Kerry King"){
+                d['height'] = 87;
+                return 87;
+            }
                     
                     // image too small
                     var check_width = (image_height/d.image_size[1]) * d.image_size[0];
@@ -769,6 +946,12 @@
             if(d.nodeType=="base"){
                 d['width'] = 0;
                 return 0;}
+
+            if(d.name == "Kerry King"){
+                d['width'] = 207;
+                return 207;
+            }
+
                     
                     // image too small
                     var check_width = (image_height/d.image_size[1]) * d.image_size[0];
@@ -791,21 +974,22 @@
 
         
         //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
-        simulation = d3.forceSimulation(nodes).velocityDecay(0.7)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+        simulation = d3.forceSimulation(nodes).alpha(0.1).velocityDecay(0.6)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
             .force("link", d3.forceLink(links).id(d => d.id).distance(function(d){
-                if(d.index%2 == 0){return 100;}
-                if(d.index%3 == 0){return 80;}
-                if(d.index%4 == 0){return 60;}
-                return 120;
-            }).strength(0.01))
-            .force("collide", d3.forceCollide().radius(35).strength(0.5))
+                return 5*vwu;
+                //if(d.index%2 == 0){return 100;}
+                //if(d.index%3 == 0){return 80;}
+                //if(d.index%4 == 0){return 60;}
+                //return 120;
+            }).strength(0.7))
+            .force("collide", d3.forceCollide().radius(37).strength(0.5))
             //.force('collision', rectCollide().size(function(d){
                 //console.log(d);
                 //return [d.width,d.height]}))
-            //.force("forceY", d3.forceY().strength(0.02))   // can't index check to alternate on nodes
+            .force("forceY", d3.forceY().strength(0.01))   // can't index check to alternate on nodes
             //.force("forceX", d3.forceX().strength(0.05))
             //.force('cluster', d3.forceCluster().centers(get_clusters(width, height)).strength(0.5))
-            .force("boundary", forceBoundary(0, 0, plot_width, plot_height - 100).strength(0.005))
+            .force("boundary", forceBoundary(0, 0, width, height-100).strength(0.1)) // 0.005
             .on("tick", ticked);
         
             
@@ -832,6 +1016,11 @@
                     var set_height = image_height;
                 }
 
+                if(d.name == "Kerry King"){
+                    set_width = 207;
+                    set_height = 87;
+                }
+
                 return d.target.x + set_width/2;
                 
             })
@@ -849,6 +1038,11 @@
                 }
                 else{
                     var set_height = image_height;
+                }
+
+                if(d.name == "Kerry King"){
+                    set_width = 207;
+                    set_height = 87;
                 }
 
                 return d.target.y + set_height;;
@@ -884,7 +1078,7 @@
             // update existing nodes
             if(changes){
                 base_node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
             }
 
             // give back data
@@ -916,12 +1110,12 @@
                     }
 
                     if(d.type == "thrash"){
-                        return "url(#specularlightskyblue)";
+                        return "url(#specularwhitesmoke)"; //"url(#specularlightskyblue)";
                     }
                 
                 })
                 .attr("r", function(d){
-                    if(d.nodeType == "base"){return 20;}
+                    if(d.nodeType == "base"){return place_radius;}
                     return 0;
                 }).merge(base_node);
             
@@ -933,12 +1127,17 @@
 
                 // transition
                 node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
 
                 // resize
                 
                 node.data(nodes, d => d.id).attr("height", function(d){
+
                     if(d.nodeType=="base"){return 0;}
+
+                    if(d.name == "Kerry King"){
+                        return 87;
+                    }
                     
                     // image too small
                     var check_width = (image_height/d.image_size[1]) * d.image_size[0];
@@ -956,19 +1155,24 @@
                     return image_height;
                 })
                 .attr("width", function(d){ // only setting for collision detection
+                    
                     if(d.nodeType=="base"){return 0;}
-                            
-                            // image too small
-                            var check_width = (image_height/d.image_size[1]) * d.image_size[0];
-                            if(check_width < image_display_range[0]){
-                                check_width = image_display_range[0];
-                            }
 
-                            // image too big
-                            if(check_width > image_display_range[1]){
-                                check_width = image_display_range[1];
-                            }
-                            return check_width;
+                    if(d.name == "Kerry King"){
+                        return 207;
+                    }
+                
+                    // image too small
+                    var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                    if(check_width < image_display_range[0]){
+                        check_width = image_display_range[0];
+                    }
+
+                    // image too big
+                    if(check_width > image_display_range[1]){
+                        check_width = image_display_range[1];
+                    }
+                    return check_width;
                 });
                 
             }
@@ -989,6 +1193,11 @@
                     if(d.nodeType=="base"){
                         d['height'] = 0;
                         return 0;}
+
+                    if(d.name == "Kerry King"){
+                        d['height'] = 87;
+                        return 87;
+                    }
                     
                     // image too small
                     var check_width = (image_height/d.image_size[1]) * d.image_size[0];
@@ -1010,22 +1219,28 @@
 
                 })
                 .attr("width", function(d){ // only setting for collision detection
+
                     if(d.nodeType=="base"){
                         d['width'] = 0;
                         return 0;}
-                            
-                            // image too small
-                            var check_width = (image_height/d.image_size[1]) * d.image_size[0];
-                            if(check_width < image_display_range[0]){
-                                check_width = image_display_range[0];
-                            }
 
-                            // image too big
-                            if(check_width > image_display_range[1]){
-                                check_width = image_display_range[1];
-                            }
-                            d['width'] = check_width;
-                            return check_width;
+                    if(d.name == "Kerry King"){
+                        d['width'] = 207;
+                        return 207;
+                    }
+                            
+                    // image too small
+                    var check_width = (image_height/d.image_size[1]) * d.image_size[0];
+                    if(check_width < image_display_range[0]){
+                        check_width = image_display_range[0];
+                    }
+
+                    // image too big
+                    if(check_width > image_display_range[1]){
+                        check_width = image_display_range[1];
+                    }
+                    d['width'] = check_width;
+                    return check_width;
                 })
                 .call(d3.drag()
                 .on("start", dragstarted)
@@ -1037,7 +1252,7 @@
             // update existing
             if(changes){
                 link.data(links, function(d) { return d.source.id + "-" + d.target.id; })
-                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
             }
             
             // then give back data
@@ -1057,17 +1272,17 @@
                     }
 
                     if(d.type== "thrash"){
-                        return "lightskyblue";
+                        return "whitesmoke"; //"lightskyblue";
                     }
                 })
                 .attr("stroke-width", 2)
-                .attr("stroke-opacity", 0.3)
+                .attr("stroke-opacity", 0.1)
                 .merge(link);
                 
         
             simulation.nodes(nodes);
             simulation.force("link").links(links);
-            simulation.alphaTarget(0.3).restart().tick();
+            simulation.alphaTarget(0.01).restart().tick();
             ticked(); // render now!
             
         }
