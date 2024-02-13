@@ -46,56 +46,56 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = "South"; 
-        let world_region = "Scandinavia"; 
+        let us_region = "Northeast"; 
+        let world_region = "South America"; 
         let region = "Italy"; // "United States of America" "United Kingdom"
         let display_region = "World"; // World
-        let grouped_region = false;
+        let grouped_region = true;
         let display_continent = "North America"; // need to manuually create list for continents
         let pop_max = 1500000;
         let THEME = "dark";
-        let current_year = 1978;
+        let current_year = 1979;
         let prev_year;
         let nodes = [];
         let links = [];
-        let display_bands = {"thrash": false, "black": true};
+        let display_bands = {"thrash": true, "black": false};
         let changes = false;
         let image_display_range = [];
         let image_height = 30;
-        var timeout = 3500;
+        var timeout = 6000;
         let image_range_object = {getRange: function(){ // watch for lots of nodes
                     let image_width_range = [];
-                    if(nodes.length < 30){
-                        image_width_range.push(vwu*6) // min
-                        image_width_range.push(vwu*10) // max
+                    if(nodes.length/2 < 30){
+                        image_width_range.push(vwu*5) // min..6
+                        image_width_range.push(vwu*9) // max..10
                         return image_width_range;
                     }
-                    else if(nodes.length < 60){
+                    else if(nodes.length/2 < 60){
                         image_width_range.push(vwu*5) // min
                         image_width_range.push(vwu*9) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 90){
+                    else if(nodes.length/2 < 90){
                         image_width_range.push(vwu*4) // min
                         image_width_range.push(vwu*8) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 120){
+                    else if(nodes.length/2 < 120){
                         image_width_range.push(vwu*4) // min
                         image_width_range.push(vwu*8) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 150){
+                    else if(nodes.length/2 < 150){
                         image_width_range.push(vwu*3) // min
                         image_width_range.push(vwu*8) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 180){
+                    else if(nodes.length/2 < 180){
                         image_width_range.push(vwu*3) // min
                         image_width_range.push(vwu*7) // max
                         return image_width_range;
                     }
-                    else if(nodes.length < 210){
+                    else if(nodes.length/2 < 210){
                         image_width_range.push(vwu*3) // min
                         image_width_range.push(vwu*6) // max
                         return image_width_range;
@@ -108,7 +108,7 @@
         }}
         
         let projections = {getProjection: function(region, width, height, fixed_states){
-                    let padding = 20;
+                    let padding = 0; /// germany 50, italy 50
                     if(region == "Norway"){
                         return d3.geoMercator().scale(900)
                         .center([10.75224540, 65.91386880]) // long, lat
@@ -127,7 +127,7 @@
                     }
                     else{ // fitextent sets translate and scale, fitsize is shortcut for fitextent with top. left 0. 0 (cant use with padding)
                         return d3.geoMercator()
-                            .fitExtent([[padding, padding], [width-padding,height-padding]],{"type": "FeatureCollection","features":fixed_states});
+                            .fitExtent([[0, padding], [width,height-padding]],{"type": "FeatureCollection","features":fixed_states});
                             //.fitSize([width,height],{"type": "FeatureCollection","features":fixed_states});
                     }// will need to tinker with South
                 
@@ -173,7 +173,7 @@
            console.log(vwu);
 
            // set chart height (bootstrap determines width)
-           document.getElementById("plot_div").style.height = "90vh";
+           document.getElementById("plot_div").style.height = "98vh";
 
            // event listeners
            document.getElementById('yearControl').addEventListener("click", handleYear);
@@ -214,6 +214,8 @@
 
          // varying time interval animation
          var myFunction = function(){
+            var skip_years = [1980,1981,1982,1983,1988,1989,1994,1995,1996,2000,2001,2003,
+                            2009, 2010, 2011, 2012, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
             clearInterval(animate_timeout);
             if(timeout == 0){
                 timeout = 3000;
@@ -229,9 +231,11 @@
             update_graph_all_genres();
             //if(timeout <= 4500){timeout += 500;}
             
-            if(current_year >= 2009 && current_year <= 2012){timeout = 2000;}
-            else{timeoout = 3500;}
-            if(current_year >= 2014){timeout = 2000;}
+            //if(skip_years.includes(current_year)){timeout = 3000;}
+            //else if(current_year <= 1987){timeout = 2000;}
+            //else{timeout = 7000;}
+            timeout = 8000;
+            //if(current_year >= 2014){timeout = 2000;}
             //else if(current_year >= 2020){timeout = 10000;}
             //else{timeout = 10000;}
             //if(current_year == 1985 || current_year == 1987){timeout = 3000;}
@@ -976,7 +980,7 @@
         //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
         simulation = d3.forceSimulation(nodes).alpha(0.1).velocityDecay(0.6)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
             .force("link", d3.forceLink(links).id(d => d.id).distance(function(d){
-                return 5*vwu;
+                return 7*vwu;
                 //if(d.index%2 == 0){return 100;}
                 //if(d.index%3 == 0){return 80;}
                 //if(d.index%4 == 0){return 60;}
@@ -986,7 +990,7 @@
             //.force('collision', rectCollide().size(function(d){
                 //console.log(d);
                 //return [d.width,d.height]}))
-            .force("forceY", d3.forceY().strength(0.01))   // can't index check to alternate on nodes
+            .force("forceY", d3.forceY().strength(0.1))   // can't index check to alternate on nodes
             //.force("forceX", d3.forceX().strength(0.05))
             //.force('cluster', d3.forceCluster().centers(get_clusters(width, height)).strength(0.5))
             .force("boundary", forceBoundary(0, 0, width, height-100).strength(0.1)) // 0.005
@@ -1078,7 +1082,7 @@
             // update existing nodes
             if(changes){
                 base_node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
             }
 
             // give back data
@@ -1127,7 +1131,7 @@
 
                 // transition
                 node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
 
                 // resize
                 
@@ -1252,7 +1256,7 @@
             // update existing
             if(changes){
                 link.data(links, function(d) { return d.source.id + "-" + d.target.id; })
-                .style("opacity", 0).transition().duration(3000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
             }
             
             // then give back data

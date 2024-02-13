@@ -248,8 +248,10 @@ let views = {"California": {"cities": ["Los Angeles", "San Francisco"]},
               "Sweden": {"cities": ["Stockholm", "Umeå"]},
               "Scandinavia": {"cities": ["Stockholm", "Oslo", "Copenhagen", "Helsinki"]},
               "Northeast":{"cities": ["New York City", "Boston"]},
-              "Germany":{"cities": ["Munich", "Dresden", "Frankfurt"]},
-              "Italy":{"cities": ["Rome", "Milan"]},
+              "Germany":{"cities": ["Essen", "Düsseldorf", "Dortmund", "Berlin"]},
+              "Italy":{"cities": ["Rome"]},
+              "South America":{"cities": ["Santiago", "São Paulo", "Buenos Aires", "Belo Horizonte"]},
+              "Finland":{"cities": ["Helsinki", "Oulu"]},
               "South": {"cities": ["Houston", "Dallas", "Richmond", "Miami", "Tampa", "New Orleans", "Austin"]}};
 
 let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "start", "Oakland": "start",
@@ -257,9 +259,12 @@ let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "star
               "New York City": "start", "Philadelphia" : "start", "Boston": "start", "Pittsburgh": "start", "Portland": "start" ,
                "Hartford":"start", "Trenton": "end", "Houston" : "start", "Dallas" : "start", "Atlanta": "start", "Richmond" : "start", 
                "Miami" : "start", "Tampa" : "end", "New Orleans": "start", "Austin": "end", 
-                "Copenhagen":"middle", "Helsinki":"middle", "Munich":"middle", "Dresden":"middle", "Frankfurt":"middle",
-                "Rome":"middle", "Milan":"middle", "Naples":"middle"};
+                "Copenhagen":"middle", "Helsinki":"start", "Berlin":"middle", "Essen":"end", "Frankfurt":"middle","Dortmund":"start",
+                "Rome":"middle", "Milan":"middle", "Naples":"middle", "Düsseldorf": "middle", "Oulu":"middle",
+              "Santiago" : "end", "Rio de Janeiro":"start", "São Paulo": "middle", "Buenos Aires": "start", "Belo Horizonte" : "start"};
 
-let world_regions = {"Scandinavia" : ["Sweden", "Norway", "Finland", "Denmark"]};
+let world_regions = {"Scandinavia" : ["Sweden", "Norway", "Finland", "Denmark"],
+                    "South America" : ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", "Guyana", "Paraguay", "Peru", "Suriname", "Uruguay", "Venezuela"],
+                  "Europe" : ["Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia", "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom", "Vatican City"]};
 
 
