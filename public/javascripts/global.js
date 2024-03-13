@@ -57,6 +57,67 @@ function create_light_filter(svg, colour){
     return svg;
 }
 
+function create_light_filter_base(svg, colour){
+  // light filter
+  //** spec lighting filter **//
+  var lightFilterSVG = svg.
+  append("filter")
+  .attr("id", "specular"+colour)
+  .attr("primitiveUnits", "objectBoundingBox");
+
+  var feSpecFilterSVG = lightFilterSVG
+  .append("feSpecularLighting")
+  .attr("result", "specOut")
+  .attr("in", "SourceGraphic")
+  .attr("lighting-color", colour)
+  .attr("surfaceScale", "1") // was 1 for normal effect
+  .attr("specularExponent", "30")
+  .attr("specularConstant", "0.4");
+
+
+  feSpecFilterSVG
+  .append("fePointLight")
+  .attr("x", "0.25") // was 0.25
+  .attr("y", "0.25") // was 0.25
+  .attr("z", "0.3");
+
+  lightFilterSVG
+  .append("feComposite")
+  .attr("in", "SourceGraphic")
+  .attr("in2", "specOut")
+  .attr("operator", "arithmetic")
+  .attr("k1", "0")
+  .attr("k2", "1")
+  .attr("k3", "1")
+  .attr("k4", "0");
+
+  return svg;
+}
+
+function create_circle_fill(svg, color){
+  var gradFill = svg
+    .append('defs')
+    .append('radialGradient')
+    .attr('id', 'circleGradLFill')
+    .attr('cx', '50%')
+    .attr('cy', '50%')
+    .attr('r', '500%')
+    .attr('fx', '50%')
+    .attr('fy', '50%');
+
+    gradFill.append('stop')
+    .attr('offset', '0%')
+    .style('stop-color', color)
+    .style('stop-opacity', 1);
+
+    gradFill.append('stop')
+    .attr('offset', '100%')
+    .style('stop-color', 'whitesmoke')
+    .style('stop-opacity', 1);
+
+    return svg;
+}
+
 function create_gradient_filter(svg, color){
     var gradFill = svg
         .append('defs')
@@ -73,16 +134,66 @@ function create_gradient_filter(svg, color){
         .style('stop-opacity', 1);
 
         gradFill.append('stop')
-        .attr('offset', '50%')
+        .attr('offset', '20%')
         .style('stop-color', 'grey')//lightgrey
         .style('stop-opacity', 1);
 
         gradFill.append('stop')
-        .attr('offset', '100%')
+        .attr('offset', '40%')
         .style('stop-color', color) //grey
         .style('stop-opacity', 1);
 
+        gradFill.append('stop')
+        .attr('offset', '60%')
+        .style('stop-color', 'grey') //whitesmoke
+        .style('stop-opacity', 1);
+
+        gradFill.append('stop')
+        .attr('offset', '80%')
+        .style('stop-color', color)//lightgrey
+        .style('stop-opacity', 1);
+
+        gradFill.append('stop')
+        .attr('offset', '100%')
+        .style('stop-color', 'grey') //grey
+        .style('stop-opacity', 1);
+
+
     return svg;
+}
+
+function create_gradient_filter_view(svg, color){
+  var gradFill = svg
+      .append('defs')
+      .append('linearGradient')
+      .attr('id', 'middleCircleFillView')
+      .attr('x1', '0%')
+      .attr('y1', '0%')
+      .attr('x2', '0%')
+      .attr('y2', '100%')
+
+      gradFill.append('stop')
+      .attr('offset', '0%')
+      .style('stop-color', color) //whitesmoke
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '33%')
+      .style('stop-color', 'grey')//lightgrey
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '66%')
+      .style('stop-color', color) //grey
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '100%')
+      .style('stop-color', 'grey') //grey
+      .style('stop-opacity', 1);
+
+
+  return svg;
 }
 
   function dragElement(elmnt) {
@@ -243,28 +354,42 @@ force.iterations = function (_) {
 return force
 }
 
-let views = {"California": {"cities": ["Los Angeles", "San Francisco"]},
-              "Norway": {"cities":["Oslo", "Bergen"]},
-              "Sweden": {"cities": ["Stockholm", "Umeå"]},
-              "Scandinavia": {"cities": ["Stockholm", "Oslo", "Copenhagen", "Helsinki"]},
-              "Northeast":{"cities": ["New York City", "Boston"]},
-              "Germany":{"cities": ["Essen", "Düsseldorf", "Dortmund", "Berlin"]},
-              "Italy":{"cities": ["Rome"]},
-              "South America":{"cities": ["Santiago", "São Paulo", "Buenos Aires", "Belo Horizonte"]},
-              "Finland":{"cities": ["Helsinki", "Oulu"]},
-              "South": {"cities": ["Houston", "Dallas", "Richmond", "Miami", "Tampa", "New Orleans", "Austin"]}};
+var pads = {"Midwest": 50, "Northwest": 120, "Northeast": 20, "Spain":80,"Finland":40,"Switzerland":50,"United Kingdom":20,
+"Germany": 30, "Italy": 20, "Sweden": 50, "South": 110, "Great Lakes": 20, "Southwest": 70, "California": 50, "Southeast":20,
+"Central America": 20};
 
-let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "start", "Oakland": "start",
-              "Oslo": "middle", "Bergen": "end", "Stockholm": "middle", "Umeå": "start", 
-              "New York City": "start", "Philadelphia" : "start", "Boston": "start", "Pittsburgh": "start", "Portland": "start" ,
-               "Hartford":"start", "Trenton": "end", "Houston" : "start", "Dallas" : "start", "Atlanta": "start", "Richmond" : "start", 
-               "Miami" : "start", "Tampa" : "end", "New Orleans": "start", "Austin": "end", 
-                "Copenhagen":"middle", "Helsinki":"start", "Berlin":"middle", "Essen":"end", "Frankfurt":"middle","Dortmund":"start",
-                "Rome":"middle", "Milan":"middle", "Naples":"middle", "Düsseldorf": "middle", "Oulu":"middle",
-              "Santiago" : "end", "Rio de Janeiro":"start", "São Paulo": "middle", "Buenos Aires": "start", "Belo Horizonte" : "start"};
+let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "start", "Oakland": "start","Denver":"end", "St. Louis":"start","Santa Fe":"start",
+ "Bergen": "end", "Umeå": "start", "Seattle":"start","New York City": "start",  "Boston": "start", "Portland": "top","San Antonio":"end",
+  "Hartford":"start", "Trenton": "end", "Houston" : "start", "Dallas" : "start", "Atlanta": "start", "Richmond" : "start", "Cedar Rapids":"start", "Omaha":"end",
+  "Miami" : "start", "Tampa" : "end", "New Orleans": "start", "Austin": "end", "Albuquerque":"end", "Corpus Christi":"start",
+   "Helsinki":"start", "Berlin":"start", "Essen":"end", "Dortmund":"end", "Waco":"end","Düsseldorf": "end",  "Little Rock":"start","Fort Worth":"end",
+"Santiago" : "end", "Rio de Janeiro":"start", "Belo Horizonte" : "start","Louisville":"end",
+"Lima": "end", "Bogata": "end", "Detroit": "start", "Cleveland":"start",  "Minneapolis":"start",
+"San Diego":"end",  "Salt Lake City":"end", "Washington":"start",
+"Munich":"start",  "Hamburg":"start",  "Sacramento":"start", "Memphis":"end", "Nashville":"end", 
+"London":"start","Newcastle upon Tyne":"start","Birmingham":"end","Liverpool":"end","Belfast":"end", "Kansas City":"end","Colorado Springs":"end","Weil am Rhein":"end",
+'Bonn': 'end','Stuttgart': 'end','Leipzig': 'start', 'Münster': 'end',
+"Regensburg":"start", "Schweinfurt":"start", "Siegen":"start", 'Kiel': 'start','Jena': 'end','Bremen': 'end','Saarbrücken': 'end',
+'Osnabrück': 'end','Cologne': 'end','Schneeberg': 'start','Baton Rouge': 'top','Tulsa': 'top','Arlington': 'end','Wichita Falls': 'end',
+'Louisville': 'top','Greensboro': 'top','Lexington': 'start',
+ 'Orlando': 'start','Raleigh': 'start','Paducah': 'top','Jacksonville': 'start','Huntsville': 'end','Alexandria': 'start',
+ 'Asheville': 'top','Bowling Green': 'end','Gainesville': 'start','Birmingham': 'end','Sanford': 'start','Washington, D.C.': 'end','Providence': 'start','Bridgeport': 'start',
+ 'Worcester': 'end','New Haven': 'end','Erie':'end','Milan': 'top','Turin': 'top','Verona': 'top','Udine': 'start','Catania': 'start','Palermo': 'end',
+ 'Birmingham': 'end','Nottingham': 'start','Edinburgh': 'start','Manchester': 'end',
+ 'Aberdeen': 'start','Glasgow': 'end','Brighton': 'start','Reading': 'top','Bogota':"end",'Brasília':"top",'Caracas':'start','Porto Alegre':"start",
+ 'Recife':'start','Quito':'end','Teresina':'top','Oslo':'start','Trondheim':'start','Mo i Rana':'start','Stavanger':'end','Sundsvall':'start', 'Stockholm':'start', 'Gothenburg':'end', 'Malmö':'end',
+ 'Skellefteå':'start','Halmstad':'end','Borlänge':'end','Gävle':'start','Karlskrona':'start',
+ 'Tegucigalpa':'top','Guatemala City':'top','Managua':'end','Panama City':'start','San Pedro Sula':'top','Grand Rapids':'top',
+ 'Fort Wayne':'top','Flint':'top','Madison':'end','Traverse City':'top','Muncie':'start','Marquette':'top','Eureka':'end',
+ 'Green Bay':'end','Bellingham':'top','Casper':'start','Billings':'start','Yakima':'top','Cheyenne':'start','Laramie':'end', 'Sheridan':'start', 'Reno':'top', "Modesto":'start'};
 
-let world_regions = {"Scandinavia" : ["Sweden", "Norway", "Finland", "Denmark"],
-                    "South America" : ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", "Guyana", "Paraguay", "Peru", "Suriname", "Uruguay", "Venezuela"],
-                  "Europe" : ["Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Liechtenstein", "Lithuania", "Luxembourg", "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands", "North Macedonia", "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Serbia", "Slovakia", "Slovenia", "Spain", "Sweden", "Switzerland", "Ukraine", "United Kingdom", "Vatican City"]};
+ let radii = {'Washington, D.C.': 18,'Providence': 20,'Philadelphia': 28,'Pittsburgh': 22,'New York City': 28,'Boston': 20,'Bridgeport': 17,'New Brunswick': 20,'Minneapolis': 25,
+ 'Arvada': 20,'Greeley': 17,'Kansas City': 20,'Denver': 35,'Iowa City': 20,'Fargo': 20,'Omaha': 20,'St. Louis': 25,'Minot': 20,'Cedar Rapids': 23,'Saint Paul': 20,
+ 'Pueblo': 20,'Colorado Springs': 20,'Columbia': 20,'Springfield': 20,'Des Moines': 20,'Cedar Rapids': 20,'Fort Collins': 20,'Olathe': 20,'Omaha': 20,'Sioux Falls': 20,
+ 'Milan': 25,'Rome': 30,'Turin': 25,'Verona': 25,'Udine': 20,'Naples': 25,'Florence': 25,'Catania': 25,'Palermo': 25,
+ 'Genoa': 25, 'Lecce':25, "Los Angeles":30, "San Francisco":30, "Oslo":30, "Bergen":25, "Stockholm": 30, 'San José':28,
+ 'Guatemala City':25, 'San Salvador':25, "Chicago":25, "Detroit":22, "Cleveland":22, "Fort Wayne": 22, "Youngstown":18, "Portland":32, "Seattle":32,
+ 'Cheyenne':15,'Laramie':15}
+
 
 
