@@ -6,21 +6,28 @@
       <div class="row">
         
         <div class="col-12"><div id="plot_div"></div></div>
-
+        <!--genre header-->
+        <div id="genreContainer">
+          <hr class="regionHR">
+          <h1 id="genreHeader" class="text-center">Thrash Metal</h1>
+          <hr class="regionHR">
+        </div>
+         <!--region header-->
+         <div id="regionContainer">
+          <hr class="regionHR">
+          <!--<h4 id="regionDisplay" class="text-center"></h4>-->
+          <hr class="regionHR">
+        </div>
           <!-- Draggable controls-->
         <div id="controls">
           <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
           <div id="controlsheader" class="controlsheader" data-mdb-toggle="collapse" data-mdb-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">
               
-              <hr style="color:white;">
-              <h4 id="regionDisplay" class="text-center" style="color:white;"></h4>
-              <hr style="color:white;">
-              <br>
-              <h1 id="genreHeader" class="text-center">Thrash Metal</h1>
-              <!--Year-->
-              <hr style="color:white;">
-              <h2 id="yearDisplay" class="text-center" style="color:white;"></h2>
-              <hr style="color:white;">
+              <hr class="regionHR">
+              <div id="yearDisplay" class="text-center"></div>
+              <h4 id="regionDisplay" class="text-center"></h4>
+              <hr class="regionHR">
+              
               <div id="yearControl" class="btn-group" role="group" aria-label="Basic example" style="display:flex;">
                 <button id="left" type="button" class="btn btn-dark"><<</button>
                 <button id="right" type="button" class="btn btn-dark">>></button>

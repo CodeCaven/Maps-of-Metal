@@ -18,6 +18,9 @@
     <link href="https://fonts.cdnfonts.com/css/metal-lord" rel="stylesheet"><!--font-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Honk"><!--Google font-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Permanent+Marker"><!--Google font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Wendy+One&display=swap" rel="stylesheet">
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/translucent.css"/>
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css"/>
@@ -26,12 +29,16 @@
         // get data from controller
         let thrash_bands = JSON.parse(<%-JSON.stringify(ejs_thrash_bands)%>);
         let black_bands = JSON.parse(<%-JSON.stringify(ejs_black_bands)%>);
+        let death_bands = JSON.parse(<%-JSON.stringify(ejs_death_bands)%>);
         let world_places = JSON.parse(<%-JSON.stringify(ejs_places)%>);
         let world_states = JSON.parse(<%-JSON.stringify(ejs_states)%>);
         let world_regions = JSON.parse(<%-JSON.stringify(ejs_world_regions)%>);
         let world_boundaries = JSON.parse(<%-JSON.stringify(ejs_map_countries)%>);
         let us_counties = JSON.parse(<%-JSON.stringify(ejs_counties)%>);
         let us_states = JSON.parse(<%-JSON.stringify(ejs_us_states)%>);
+        let canada_divisions = JSON.parse(<%-JSON.stringify(ejs_can_divs)%>);
+        let german_divisions = JSON.parse(<%-JSON.stringify(ejs_german_divs)%>);
+        let german_states = JSON.parse(<%-JSON.stringify(ejs_german_states)%>);
         let metal_continents = JSON.parse(<%-JSON.stringify(ejs_continents)%>);
         let us_state_data = JSON.parse(<%-JSON.stringify(ejs_state_data)%>);
 
@@ -47,59 +54,51 @@
         let current_projection;
         let simulation;
         let us_region = "South"; 
-        let world_region = "Central America"; 
-        let region = "Germany"; // "United States of America" "United Kingdom"
+        let world_region = "South America"; 
+        let region = "Canada"; // "United States of America" "United Kingdom"
         let display_region = "World"; // World
         let grouped_region = false;
-        let display_continent = "North America"; // need to manuually create list for continents
+        let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
-        let current_year = 1984;
+        let current_year = 1980;
         let cap = 90;
         let prev_year;
         let nodes = [];
         let links = [];
         let display_bands_list = [];
         let lookup = {};
-        let display_bands = {"thrash":false, "black":false};
-        let display_genre = "thrash";
+        let display_bands = {"thrash":false, "black":false, "death":false};
+        let display_genre = "death";
         let changes = false;
         let image_width = 0;
-        let base_image_width = 100;
+        let base_image_width = 110;
         let min_image_height = 0;
         let max_image_height = 0;
         var timeout = 6000;
         var views;
         let animate = false;
+        let map_region;
         
         let projections = {getProjection: function(region, width, height, fixed_states){
+
+                // map view settings from object
+                if(region in map_settings){
+                    var mapView = map_settings[region];
+                    return d3.geoMercator()
+                        .center(mapView.centre)
+                        .translate([width/2, height/2])
+                        .scale(mapView.scale);
+                }
+                else{ // general fit with padding
                     var padding = 0;
                     if(region in pads){
                         padding = pads[region];
                     }
-                    if(region == "Norway"){
-                        return d3.geoMercator().scale(900)
-                        .center([10.75224540, 65.91386880]) // long, lat
-                        .translate([width/2, height/2]);
-                    }
-                    if(region == "Scandinavia"){
-                        return d3.geoMercator().scale(700)
-                        .center([12.75224540, 64.91386880])
-                        .translate([width/2, height/2]);
-                    }
-                    else if(region == "World"){
-                        return d3.geoMercator().scale(200)
-                        .center([39.00, 34.00])
-                        .translate([width/2, height/2]);
-                            //.fitSize([width,height],{"type": "FeatureCollection","features":fixed_states});
-                    } // d3.geoEquirectangular() d3.geoMercator()
-                    else{ // fitextent sets translate and scale, fitsize is shortcut for fitextent with top. left 0. 0 (cant use with padding)
-                        return d3.geoMercator()
-                            .fitExtent([[padding, padding], [width-padding,height-padding]],{"type": "FeatureCollection","features":fixed_states});
-                            //.fitSize([width,height],{"type": "FeatureCollection","features":fixed_states});
-                    }// will need to tinker with South
-                
+                    return d3.geoMercator() // ,{"type": "FeatureCollection","features":fixed_states}
+                        .fitExtent([[padding, padding], [width-padding,height-padding]], {"type": "FeatureCollection","features":fixed_states});
                 }
+            }
         }
 
         // DOM loaded callback
@@ -112,9 +111,14 @@
             // natural earth country names
             // https://unstats.un.org/unsd/methodology/m49/
 
+            // here
+            // ticked code clean up plus set height
+            // proper label margins from anchors
+
            // log data
            console.log(thrash_bands);
            console.log(black_bands);
+           console.log(death_bands);
            console.log(world_places);
            console.log(world_states);
            console.log(world_regions);
@@ -123,14 +127,13 @@
            console.log(us_states);
            console.log(metal_continents);
            console.log(us_state_data);
+           console.log(german_divisions);
 
            // umique cities
            let unique_cities = world_places.features.map(prop => prop.properties.NAME_EN);
            unique_cities.sort();
            console.log(unique_cities);
 
-           // set New Mexico to South (change in data!)
-           us_state_data["New Mexico"]["region"] = "South";
 
            // global units
            vhu = parseFloat(window.innerHeight/100);
@@ -148,14 +151,14 @@
            // set year and area display
            document.getElementById("yearDisplay").innerHTML = current_year;
            if(!(grouped_region)){
-                document.getElementById("regionDisplay").innerHTML = region;
+                document.getElementById("regionDisplay").innerHTML = region.toUpperCase();
            }
            else{// will need to update for world continents
                 if(display_region == "US"){
-                    document.getElementById("regionDisplay").innerHTML = "US " + us_region;
+                    document.getElementById("regionDisplay").innerHTML = "US " + us_region.toUpperCase();
                 }
                 else{
-                    document.getElementById("regionDisplay").innerHTML = world_region;
+                    document.getElementById("regionDisplay").innerHTML = world_region.toUpperCase();
                 }
            }
 
@@ -174,6 +177,9 @@
            if(display_bands["thrash"]){
             views = thrash_views;
             genre_display.innerHTML = "Thrash Metal"}
+           else if(display_bands["death"]){
+            views = death_views;
+            genre_display.innerHTML = "Death Metal"}
            else{
             views = black_views;
             genre_display.innerHTML = "Black Metal"}
@@ -181,19 +187,23 @@
            // init draggable controls
            dragElement(document.getElementById("controls"));
 
-           // set background by theme
-           if(THEME == "dark"){
-             document.body.style.backgroundColor = "black";
-             document.getElementById("yearDisplay").style.color = "white";
-           }else{
-             document.body.style.backgroundColor = "white";
-             document.getElementById("yearDisplay").style.color = "black";
-           }
-
+           // set background 
+           document.body.style.backgroundColor = "black";
+    
            // create bands list and lookup
            display_bands_list = create_bands_list();
            lookup = create_lookup(display_bands_list);
 
+           // set map region
+           if(display_region == "World"){
+            if(grouped_region){map_region = world_region;}
+            else{map_region = region;}
+           }
+           else{
+            if(grouped_region){map_region = us_region;}
+            else{map_region = region;}
+           }
+            
            draw_map();
            update_chart();
            
@@ -294,6 +304,10 @@
             if(display_bands["black"]){
                 create_graph(current_projection, lookup, display_bands_list, "black");
             }
+
+            if(display_bands["death"]){
+                create_graph(current_projection, lookup, display_bands_list, "death");
+            }
     
          }
 
@@ -304,6 +318,10 @@
 
             if(display_bands["black"]){
                 update_graph(current_projection, lookup, display_bands_list, "black");
+            }
+
+            if(display_bands["death"]){
+                update_graph(current_projection, lookup, display_bands_list, "death");
             }
             update_chart();
             changes = false;
@@ -366,6 +384,9 @@
             var bands = [];
             if(display_genre == "thrash"){
                 var search_bands = thrash_bands;
+            }
+            else if(display_genre == "death"){
+                var search_bands = death_bands;
             }
             else{
                 var search_bands = black_bands;
@@ -591,28 +612,98 @@
                 .attr("transform",
                     "translate(" + margin.left + "," + margin.top + ")");
 
-               
+            // set map colour and base colour
+            // https://simplicable.com/colors/dark-yellow-color ... another color site
+            // midnight green .... #004955
+            // carribean current .... #105E60
+            // darkolive .... #373F38
+            // darkslategrey
+            // onyx .... #444243
+            // crystal teal ... #00637c
+            // vintage violet ... #634f62
+            // golden brown .... #9B773D
+            // bright brown .... #936D58
+            // teal .... #016764
+            // gunmetal ... #2B3C43
+            // blue ... #1B435E
+            // lightbrown ... #775E59
+            // darklime .... #827717
+            // darkgoldenrod
+            // lime ... #9E9D24
+            // bluegrey ... #607D8B
             let mapColour = ""; // 57,57,57 is background cut-off for alpha
-            if(display_bands["thrash"]){ // update display variables ??
-                mapColour = "rgba(100,100,0,1)"; // 57,57,57 is background cut-off for alpha
+            let baseColour = "";
+            let boundaryColour = "";
+            if(display_genre == "thrash"){ //  bright brown?  https://icolorpalette.com/download/palette/535890_color_palette.jpg
+                mapColour = "darkgoldenrod";  
+                baseColour = "lightyellow"; 
+                boundaryColour = "black";
+                
             }
-            else{
-                mapColour = "rgba(0,100,100,1)"; // 57,57,57 is background cut-off for alpha
+            else if(display_genre == "black"){ // teal 
+                mapColour = "#016764";  
+                baseColour = "aliceblue";
+                boundaryColour = "black";
             }
+            else if(display_genre == "death"){ //  gunmetal
+                mapColour = "#936D58"; 
+                baseColour = "antiquewhite"; 
+                boundaryColour = "black";
+                
+            }
+            else if(display_genre == "power"){//  crystal teal
+                mapColour = "#00637c"; 
+                baseColour = "beige";
+            }
+            else if(display_genre == "speed"){ //  
+                mapColour = "#775E59"; //  light brown
+                baseColour = "cornsilk";
+            }
+            else if(display_genre == "heavy"){  // vintage violet
+                mapColour = "#634f62"; 
+                baseColour = "honeydew";
+            }
+            else if(display_genre == "groove"){ // darkslategrey
+                mapColour = "darkslategrey";
+                baseColour = "linen";
+            }
+            else{ // all metal.
+                mapColour = "#444243"; // onyx
+                baseColour = "lighteblue"; // whitesmoke
+            }
+
             
+            //** grads and filters
             //svg = create_light_filter(svg, "lightskyblue");
            // svg = create_light_filter(svg, "whitesmoke");
             //svg = create_light_filter(svg, "antiquewhite"); // reddish for Death
             //svg = create_light_filter(svg, "beige");
-            svg = create_light_filter(svg, "aliceblue");
+            svg = create_light_filter(svg, baseColour);
             //svg = create_light_filter(svg, "cornsilk");
             //svg = create_light_filter(svg, "honeydew");
-            svg = create_light_filter(svg, "lightyellow");
             svg = create_light_filter_base(svg, "whitesmoke");
             //svg = create_light_filter(svg, "linen");
             svg = create_gradient_filter(svg, mapColour);
-            svg = create_gradient_filter_view(svg, mapColour);
-            svg = create_circle_fill(svg, mapColour);
+            svg = create_gradient_filter_boundary(svg, baseColour);
+            svg = create_circle_fill(svg, mapColour, baseColour);
+            svg = create_label_fill(svg, baseColour);
+
+            // set display backgrounds
+            //document.getElementById("yearDisplay").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
+            document.getElementById("yearDisplay").style.webkitTextStroke  = "3px " + "whitesmoke";
+            document.getElementById("yearDisplay").style.textShadow  = "2px 2px 5px " + baseColour;
+            //document.getElementById("regionDisplay").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
+            document.getElementById("regionDisplay").style.webkitTextStroke  = "1px " + "whitesmoke";
+            //document.getElementById("regionDisplay").style.textShadow  = "2px 2px 5px " + mapColour;
+            //document.getElementById("genreHeader").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
+            //document.getElementById("genreHeader").style.color = baseColour;
+            document.getElementById("genreHeader").style.webkitTextStroke  = "1px " + "whitesmoke";
+            document.getElementById("genreHeader").style.textShadow  = "2px 2px 0px " + mapColour;
+
+            var hrs = document.getElementsByClassName('regionHR');
+            for(let hr of hrs){
+                hr.style.color = "whitesmoke";
+            }
 
             // scales
             let radScale = d3.scaleSqrt()
@@ -621,7 +712,7 @@
 
             let textScale = d3.scaleLinear()
             .domain([100000, 5000000])
-            .range([0.5, 0.5]).clamp(true);
+            .range([0.7, 0.7]).clamp(true);
 
             let imageScale = d3.scaleLinear()// using image range at the moment
             .domain([1, 200])// number of nodes
@@ -690,7 +781,13 @@
             // world
             //var display_states = world_states.features.filter(prop => prop.properties.admin != "Greenland");
             //var display_boundary = world_boundaries.features.filter(prop => prop.properties.ADMIN != "Greenland");
-                    
+            
+            // using different german states to match counties
+            if(region == "Germany" && display_region == "World"){
+                if(!(grouped_region)){
+                    display_states = german_states.features;
+                }
+            }
             // turf unwind features for plot
             var fixed_states = display_states.map(function(f) {
                     return turf.rewind(f,{reverse:true});
@@ -698,6 +795,16 @@
 
             // turf unwind features for plot (boundary)
             var fixed_boundary_states = display_boundary.map(function(f) {
+                    return turf.rewind(f,{reverse:true});
+            });
+
+            // turf unwind features for plot (canada divisions)
+            var fixed_divisions_canada = canada_divisions.features.map(function(f) {
+                    return turf.rewind(f,{reverse:true});
+            });
+
+            // turf unwind features for plot (canada divisions)
+            var fixed_divisions_germany = german_divisions.features.map(function(f) {
                     return turf.rewind(f,{reverse:true});
             });
 
@@ -781,6 +888,38 @@
                 }
             }
 
+            // canada divs
+            if(region == "Canada"){
+                svg
+                .append("g")
+                .selectAll("divisions")
+                .data(fixed_divisions_canada)
+                .join("path")
+                .attr("d", path)
+                .attr("fill","url(#circleGradFill)")
+                .attr("fill-opacity", 0.7)
+                .attr("stroke", mapColour)
+                .attr("stroke-width", 0.5)
+                .attr("stroke-opacity", 0.1)
+                .attr("class", "statearea");
+            }
+
+            // german divs
+            if(region == "Germany"){
+                svg
+                .append("g")
+                .selectAll("divisions")
+                .data(fixed_divisions_germany)
+                .join("path")
+                .attr("d", path)
+                .attr("fill","url(#circleGradFill)")
+                .attr("fill-opacity", 0.7)
+                .attr("stroke", mapColour)
+                .attr("stroke-width", 0.5)
+                .attr("stroke-opacity", 0)
+                .attr("class", "statearea");
+            }
+
             // counties or states
             svg
             .append("g")
@@ -788,15 +927,23 @@
             .data(fixed_states)
             .join("path")
             .attr("d", path)
-            //.attr("fill", mapColour) 
-            //.attr("fill","url(#middleCircleFill)")
-            .attr("fill","url(#circleGradLFill)")
-            .attr("stroke", function(){
-                if(THEME == "dark"){return mapColour}
-                return "url(#middleCircleFill)";
+            .attr("fill",function(d){ // handle germany and canada different (diff. jsons for divisions)
+                if((region == "Canada" || region == "Germany") && display_region == "World" && !(grouped_region)){return "none";}
+                return  "url(#circleGradFill)";
+            }) 
+            .attr("fill-opacity",0.7)
+            .attr("stroke", function(d){
+                if((region == "Canada" || region == "Germany") && display_region == "World" && !(grouped_region)){return boundaryColour;}
+                return mapColour;
             })
-            .attr("stroke-width", 1)
-            .attr("stroke-opacity", 1)
+            .attr("stroke-width", function(d){
+                if((region == "Canada" || region == "Germany") && display_region == "World" && !(grouped_region)){return 1;}
+                return  0.5;
+            }) 
+            .attr("stroke-opacity", function(d){
+                    if((region == "Canada" || region == "Germany") && display_region == "World" && !(grouped_region)){return 1;}
+                    return 0.1;
+            })
             .attr("class", "statearea");
 
             // boundaries
@@ -806,15 +953,17 @@
             .data(fixed_boundary_states)
             .join("path")
             .attr("d", path)
-            .attr("fill", "none")
-            //.attr("fill","url(#middleCircleFill)")
-            .attr("stroke", function(){
-                if(grouped_region){return 'var(--bs-dark)';}
-                return "url(#middleCircleFill)";
-            })
+            .attr("fill", 'none')
+            .attr("stroke", boundaryColour) 
             .attr("class", "boundary")
-            .attr("stroke-width", 1) // 1.5
-            .attr("stroke-opacity", 1);
+            .attr("stroke-width", function(d){
+                //if(region == "Canada" && display_region == "World"){return 1;}
+                return  0.5;
+            }) 
+            .attr("stroke-opacity", function(d){
+                    //if(region == "Canada" && display_region == "World"){return 0.3;}
+                    return 0.5;
+            });
 
             // circle city markers
             svg
@@ -829,8 +978,41 @@
             .attr("fill-opacity", 0.5)
             .attr("stroke", "url(#middleCircleFill)") //url(#middleCircleFill)
             .attr("stroke-width", 1)
-            .attr("stroke-opacity", 1)
+            .attr("stroke-opacity", 0.5)
             .attr("class", "views");
+
+            // multi-viewers markers
+            if(map_region in multi_views){
+                
+                // add multi view marker
+                for(let view of multi_views[map_region]){
+                    
+                    svg
+                    .selectAll("multimarkers")
+                    .data([view])
+                    .enter()
+                    .append('circle')
+                    .attr('cx', d => current_projection(d.loc)[0])
+                    .attr('cy', d => current_projection(d.loc)[1])
+                    .attr('r', d => d['radius']) 
+                    .attr("fill", "black")
+                    .attr("fill-opacity", 0.5)
+                    .attr("stroke", "url(#middleCircleFill)") //url(#middleCircleFill)
+                    .attr("stroke-width", 1)
+                    .attr("stroke-opacity", 0.5)
+                    .attr("class", "views");
+
+                    // add data now to places for text boxes...HERE handle radius for text
+                    for(let tag of view.tags){
+                        var new_point = {"geometry":{"coordinates":view.loc}, 'radius':view['radius'],// any pop max its scaled
+                            "properties":{"NAME_EN": tag, "POP_MAX": 100000000}}
+                        places_points.push(new_point);
+
+                    }
+
+                }
+
+            }
         
             
             // add links (here so behind other elements)
@@ -856,14 +1038,14 @@
             .style('font-size', d => textScale(d.properties.POP_MAX)+"rem")
             .style('font-weight', 700)
             .attr("letter-spacing", "2px")
-            .text(d => d.properties.NAME_EN.toUpperCase())
+            .text(d => d.properties.NAME_EN)
             .call(getBB);
 
             // remove the text elements (watch for other text elements)
             d3.selectAll("text").remove();
 
-            const xMargin = 6;
-            const yMargin = 4;
+            const xMargin = 2;
+            const yMargin = 2;
             
             // add background rects
             svg
@@ -877,7 +1059,7 @@
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2;
                 }
                 if(anchors[d.properties.NAME_EN] == "start"){
-                    return current_projection(d.geometry.coordinates)[0] + d['radius'] + xMargin/2;
+                    return current_projection(d.geometry.coordinates)[0] + d['radius'];// + xMargin/2;
                 };
                 if(anchors[d.properties.NAME_EN] == "top"){
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2;
@@ -894,19 +1076,22 @@
                 if(anchors[d.properties.NAME_EN] == "top"){
                     return current_projection(d.geometry.coordinates)[1] - d['radius'] - yMargin;
                 };
+                if(d.properties.NAME_EN == 'São Paulo'){ // adjust for south america  view 
+                    return current_projection(d.geometry.coordinates)[1] - 10;
+                }
                 return current_projection(d.geometry.coordinates)[1];
             })
             .attr("width", d => d.bbox.width + 2 * xMargin)
             .attr("height", d => d.bbox.height + 2 * yMargin)
             .style("fill", function(){
-                if(THEME == "dark"){return "var(--bs-dark)"}
+                if(THEME == "dark"){return "url(#tagGradFill)"}
                 return "black";
             })
-            .attr("rx", 5)
+            .attr("rx", 4)
             .attr("stroke", "grey")
             .attr("stroke-width", 1)
-            .style("fill-opacity", 0.5)
-            .style("stroke-opacity", 0.5)
+            .style("fill-opacity", 0.8)
+            .style("stroke-opacity", 0.8)
             .attr('transform', function(d) {
                 return `translate(-${xMargin}, -${d.bbox.height * 0.8 + yMargin})`
                 });
@@ -924,7 +1109,7 @@
                     return 0;
                 }
                 if(anchors[d.properties.NAME_EN] == "start"){
-                    return d['radius'] + xMargin/2;
+                    return d['radius'];// + xMargin/2;
                 };
                 if(anchors[d.properties.NAME_EN] == "top"){
                     return -d.bbox.width/2; // because there is no top anchor
@@ -941,6 +1126,9 @@
                 if(anchors[d.properties.NAME_EN] == "top"){
                     return -1*d['radius'] - yMargin;
                 };
+                if(d.properties.NAME_EN == 'São Paulo'){ // adjust for south america  view 
+                    return -10;
+                }
                 return 0; // end
             })
             //.attr("stroke", function(){
@@ -948,7 +1136,7 @@
                 //return "black";
             //})
             .attr("fill", function(){
-                if(THEME == "dark"){return "beige"}
+                if(THEME == "dark"){return "black"}
                 return "black";
             })
             .style('font-size', d => textScale(d.properties.POP_MAX)+"rem")
@@ -960,7 +1148,7 @@
                 }
                 return "middle";
             })
-            .text(d => d.properties.NAME_EN.toUpperCase());
+            .text(d => d.properties.NAME_EN);
 
 
         /* FORCE SIMULATION */
@@ -974,8 +1162,8 @@
         // add band nodes (image) NOTE: need to give image nodes data before update function (for positions i think)
         var no_nodes = nodes.length/2; // account for base nodes
         image_width = base_image_width - Math.ceil(no_nodes/20)*10; // decrease every 14
-        min_image_height = image_width/5;
-        max_image_height = image_width/1.5;
+        min_image_height = image_width/4;
+        max_image_height = image_width/2;
 
         var node = svg.append("g").selectAll("images")
         .data(nodes, d => d.id)
@@ -993,6 +1181,7 @@
 
             if(d.nodeType=="base"){
                 d['width'] = 0;
+                d['height'] = 0;
                 return 0;}
 
             // set from image wwidth and adjust
@@ -1000,6 +1189,9 @@
             var node_width = image_width;
             if(image_height < min_image_height){
                 node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
+                if(node_width>(1.5*image_width)){ // cap width
+                    node_width = 1.5*image_width;
+                }
 
             }
             else if(image_height > max_image_height){
@@ -1008,6 +1200,7 @@
             }
 
             d['width'] = node_width;
+            d['height'] = (node_width/d.image_size[0]) * d.image_size[1];
             return node_width;
             })  
         .attr("class", "nodes")
@@ -1018,25 +1211,16 @@
 
         
         //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
-        simulation = d3.forceSimulation(nodes).velocityDecay(0.7)//.alphaMin(0.5)//.alphaDecay(0.01)//.velocityDecay(0.4)//.alpha(0.1)..velocityDecay(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
-            .force("link", d3.forceLink(links).id(d => d.id).strength(1))
+        simulation = d3.forceSimulation(nodes).velocityDecay(0.6)//.alphaMin(0.5)//.alphaDecay(0.01)//.velocityDecay(0.4)//.alpha(0.1)..velocityDecay(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+            .force("link", d3.forceLink(links).id(d => d.id).strength(0.5))
             .force("collide", d3.forceCollide().radius(function(d){
                 if(d['nodeType'] == 'band'){
-                    // set from image wwidth and adjust
-                    var image_height = (image_width/d.image_size[0]) * d.image_size[1];
-                    var node_width = image_width;
-                    if(image_height < min_image_height){
-                        node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
-
+                    if(d.width >= d.height){
+                        return d.width/2;
                     }
-                    else if(image_height > max_image_height){
-                        node_width = (max_image_height/d.image_size[1]) * d.image_size[0];
+                    else{
+                        return d.height/2;
                     }
-
-                    if (node_width > image_width){
-                        return (node_width/2);
-                    }
-                    return (image_width/2);
                 }
                 else{
                     return 25;
@@ -1085,12 +1269,13 @@
                 
             }
         }
-
+        
         // ticked function
         function ticked() {
             
-            
+           
             // source is base
+            // HERE: set image height initially amd remove y2 code below
             link
             .attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
@@ -1098,32 +1283,22 @@
                 return d.target.x + d.target.width/2;
             })
             .attr("y2", function(d){
-
-               // set from image wwidth and adjust
-                var image_height = (image_width/d.image_size[0]) * d.image_size[1];
-                var node_width = image_width;
-                if(image_height < min_image_height){
-                    node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
-
-                }
-                else if(image_height > max_image_height){
-                    node_width = (max_image_height/d.image_size[1]) * d.image_size[0];
-                }
-
-                // find height from node width
-                image_height = (node_width/d.image_size[0]) * d.image_size[1];
-
-               // middle of icon
-                return d.target.y + image_height/2;
+                return d.target.y + d.target.height/2;
             });
     
             node
-            .attr("x", d => d.x)
-            .attr("y", d => d.y);
+            .attr("x", function(d){
+                return d.x;
+            })
+            .attr("y", function(d){
+                return d.y;
+            });
 
+            
             base_node
             .attr("cx", d => d.x)
             .attr("cy",d => d.y);
+            
             
         }
 
@@ -1135,8 +1310,8 @@
             // set image width
             var no_nodes = nodes.length/2; // account for base nodes
             image_width = base_image_width - Math.ceil(no_nodes/20)*10; // 60 - 140
-            min_image_height = image_width/5;
-            max_image_height = image_width/1.5;
+            min_image_height = image_width/4;
+            max_image_height = image_width/2;
             //console.log(image_width + " image width");
 
             // let the speed function know its animating
@@ -1152,17 +1327,19 @@
 
             //* base node
 
-            // update existing nodes
+            // update existing nodes..HERE transition without data
             if(changes){
                 base_node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(2000).style("opacity", 0)
+                .transition().duration(3000).style("opacity", 1);
             }
 
             // give back data
             base_node = base_node.data(nodes, d => d.id);
 
             // exit nodes
-            base_node.exit().transition().duration(3000).style("opacity", 0).remove();
+            base_node.exit()
+            .transition().duration(3000).style("opacity", 0).remove();
 
             // enter new nodes (diff based on whether in view or not)
             base_node = base_node
@@ -1170,7 +1347,29 @@
                 .attr("class", "nodes")
                 .attr("fill", function(d){
                     if(d.nodeType == "band"){return "none";}
-                    return 'black';// "var(--bs-dark)"
+                    return "black";
+                })
+                .attr("stroke-width", 0)
+                .style("stroke-opacity", function(d){
+                    var in_view = false;
+                    var views = document.getElementsByClassName('views');
+                    for(let view of views){
+                        // bbox
+                        var bb = view.getBBox();
+
+                        // bottom right
+                        bb.ax = bb.x + bb.width;
+                        bb.ay = bb.y + bb.height;
+                    
+
+                        if(bb.x <= d.x && d.x <= bb.ax && bb.y <= d.y && d.y <= bb.ay ) {
+                            // Point is in bounding box
+                            in_view = true;
+                        }
+                        
+                    }
+                    if(in_view){return 0;}
+                    return 1;
                 })
                 .style("fill-opacity", function(d){
                     var in_view = false;
@@ -1191,7 +1390,7 @@
                         
                     }
                     if(in_view){return 0;}
-                    return 1;
+                    return 0;
                 })
                 .attr("filter", function(d){
                     var in_view = false;
@@ -1214,15 +1413,8 @@
                     if(!(in_view)){
                         return "url(#specularwhitesmoke)";
                     }
-
-                    // only for in view nodes
-                    if(d.type == "black"){
-                        return "url(#specularaliceblue)";
-                    }
-
-                    if(d.type == "thrash"){
-                        return "url(#specularlightyellow)"; //"url(#specularlightyellow)";
-                    }
+                    return "url(#specular" + baseColour + ")"
+                    
                 })
                 .attr("r", function(d){
                     if(d.nodeType == "band"){return 0;}
@@ -1248,7 +1440,7 @@
                     if(in_view){
                         return place_radius;
                     }
-                    else{return 2;}
+                    else{return 8;}
 
                 }).merge(base_node);
             
@@ -1256,11 +1448,13 @@
             //** image nodes
 
             // update existing nodes
+            
             if(changes){
 
                 // transition
                 node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(2000).style("opacity", 0)
+                .transition().duration(3000).style("opacity", 1);
 
                 // resize
                 node.data(nodes, d => d.id)
@@ -1268,6 +1462,7 @@
 
                     if(d.nodeType=="base"){
                         d['width'] = 0;
+                        d['height'] = 0;
                         return 0;}
 
                     // set from image wwidth and adjust
@@ -1275,6 +1470,9 @@
                     var node_width = image_width;
                     if(image_height < min_image_height){
                         node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
+                        if(node_width>(1.5*image_width)){ // cap width
+                            node_width = 1.5*image_width;
+                        }
 
                     }
                     else if(image_height > max_image_height){
@@ -1282,16 +1480,19 @@
                     }
 
                     d['width'] = node_width;
+                    d['height'] = (node_width/d.image_size[0]) * d.image_size[1];
                     return node_width;
                 });
                 
             }
             
+
             // then give data
             node = node.data(nodes, d => d.id);
             
             // exit nodes
-            node.exit().transition().duration(3000).style("opacity", 0).remove();
+            node.exit()
+            .transition().duration(3000).style("opacity", 0).remove();
             
             // enter new nodes
             node = node
@@ -1310,6 +1511,7 @@
 
                     if(d.nodeType=="base"){
                         d['width'] = 0;
+                        d['height'] = 0;
                         return 0;}
 
                     // set from image wwidth and adjust
@@ -1317,6 +1519,9 @@
                     var node_width = image_width;
                     if(image_height < min_image_height){
                         node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
+                        if(node_width>(1.5*image_width)){ // cap width
+                            node_width = 1.5*image_width;
+                        }
 
                     }
                     else if(image_height > max_image_height){
@@ -1324,6 +1529,7 @@
                     }
 
                     d['width'] = node_width;
+                    d['height'] = (node_width/d.image_size[0]) * d.image_size[1];
                     return node_width;
                 })
                 .call(d3.drag()
@@ -1336,14 +1542,16 @@
             // update existing
             if(changes){
                 link.data(links, function(d) { return d.source.id + "-" + d.target.id; })
-                .style("opacity", 0).transition().duration(4000).style("opacity", 1);
+                .style("opacity", 0).transition().duration(2000).style("opacity", 0)
+                .transition().duration(3000).style("opacity", 1);
             }
             
             // then give back data
             link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
 
             // exit links
-            link.exit().transition().duration(3000).style("opacity", 0).remove();
+            link.exit()
+            .transition().duration(3000).style("opacity", 0).remove();
             
             // enter new links
             link = link
@@ -1351,49 +1559,36 @@
                 .append("line")
                 .attr("class", "links")
                 .attr("stroke", function(d){
-                    if(d.type == "black"){
-                        return "aliceblue";
-                    }
-
-                    if(d.type== "thrash"){
-                        return "lightyellow"; //"lightyellow";
-                    }
+                    return baseColour;
                 })
                 .attr("stroke-width", 1)
-                .attr("stroke-opacity", 0.2)
+                .attr("stroke-opacity", 0.3)
                 .merge(link);
+        
+                if(changes){
+                    simulation
+                        .force("link", d3.forceLink(links).id(d => d.id).strength(0.5))
+                        .force("collide", d3.forceCollide().radius(function(d){
+                        if(d['nodeType'] == 'band'){
+                            
+                            if(d.width >= d.height){
+                                return d.width/2;
+                            }
+                            else{
+                                return d.height/2;
+                            }
+                        }
+                        else{
+                            return 25;
+                        }
+                    }).strength(0.5));
+
+                    // regen sim
+                    simulation.nodes(nodes);
+                    simulation.alpha(0.3).restart().tick();
+                    ticked(); // render now!
+                }
                 
-            if(changes){
-                simulation.nodes(nodes);
-                simulation.force("link").links(links);
-                simulation.force("collide", d3.forceCollide().radius(function(d){
-                    if(d['nodeType'] == 'band'){
-                        // set from image wwidth and adjust
-                        var image_height = (image_width/d.image_size[0]) * d.image_size[1];
-                        var node_width = image_width;
-                        if(image_height < min_image_height){
-                            node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
-
-                        }
-                        else if(image_height > max_image_height){
-                            node_width = (max_image_height/d.image_size[1]) * d.image_size[0];
-                        }
-
-                        if (node_width > image_width){
-                            return (node_width/2);
-                        }
-                        return (image_width/2);
-                    }
-                    else{
-                        return 25;
-                    }
-                }).strength(0.5));
-
-                simulation.alpha(0.15).restart(); //.tick();
-                //simulation.alpha(0.5).restart();
-                //ticked(); // render now!
-            }
-            
         }
 
         // get bb of text

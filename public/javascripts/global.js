@@ -77,8 +77,8 @@ function create_light_filter_base(svg, colour){
 
   feSpecFilterSVG
   .append("fePointLight")
-  .attr("x", "0.25") // was 0.25
-  .attr("y", "0.25") // was 0.25
+  .attr("x", "0.5") // was 0.25
+  .attr("y", "0.5") // was 0.25
   .attr("z", "0.3");
 
   lightFilterSVG
@@ -94,16 +94,16 @@ function create_light_filter_base(svg, colour){
   return svg;
 }
 
-function create_circle_fill(svg, color){
+function create_circle_fill(svg, color, baseColor){
   var gradFill = svg
     .append('defs')
     .append('radialGradient')
-    .attr('id', 'circleGradLFill')
-    .attr('cx', '50%')
-    .attr('cy', '50%')
-    .attr('r', '500%')
-    .attr('fx', '50%')
-    .attr('fy', '50%');
+    .attr('id', 'circleGradFill')
+    .attr('cx', '100%')
+    .attr('cy', '0%')
+    .attr('r', '400%')
+    .attr('fx', '100%')
+    .attr('fy', '0%');
 
     gradFill.append('stop')
     .attr('offset', '0%')
@@ -112,11 +112,35 @@ function create_circle_fill(svg, color){
 
     gradFill.append('stop')
     .attr('offset', '100%')
-    .style('stop-color', 'whitesmoke')
+    .style('stop-color', baseColor)
     .style('stop-opacity', 1);
 
     return svg;
 }
+
+function create_label_fill(svg, baseColor){
+    var gradFill = svg
+      .append('defs')
+      .append('radialGradient')
+      .attr('id', 'tagGradFill')
+      .attr('cx', '50%')
+      .attr('cy', '50%')
+      .attr('r', '100%')
+      .attr('fx', '50%')
+      .attr('fy', '50%');
+  
+      gradFill.append('stop')
+      .attr('offset', '30%')
+      .style('stop-color', baseColor)
+      .style('stop-opacity', 1);
+  
+      gradFill.append('stop')
+      .attr('offset', '100%')
+      .style('stop-color', "black")
+      .style('stop-opacity', 1);
+  
+      return svg;
+  }
 
 function create_gradient_filter(svg, color){
     var gradFill = svg
@@ -162,11 +186,11 @@ function create_gradient_filter(svg, color){
     return svg;
 }
 
-function create_gradient_filter_view(svg, color){
+function create_gradient_filter_boundary(svg, color){
   var gradFill = svg
       .append('defs')
       .append('linearGradient')
-      .attr('id', 'middleCircleFillView')
+      .attr('id', 'boundaryStrokeGrad')
       .attr('x1', '0%')
       .attr('y1', '0%')
       .attr('x2', '0%')
@@ -174,24 +198,58 @@ function create_gradient_filter_view(svg, color){
 
       gradFill.append('stop')
       .attr('offset', '0%')
+      .style('stop-color', "black") //whitesmoke
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '10%')
+      .style('stop-color', color)//lightgrey
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '20%')
+      .style('stop-color', "black") //grey
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '30%')
       .style('stop-color', color) //whitesmoke
       .style('stop-opacity', 1);
 
       gradFill.append('stop')
-      .attr('offset', '33%')
-      .style('stop-color', 'grey')//lightgrey
+      .attr('offset', '40%')
+      .style('stop-color', "black")//lightgrey
       .style('stop-opacity', 1);
 
       gradFill.append('stop')
-      .attr('offset', '66%')
+      .attr('offset', '50%')
       .style('stop-color', color) //grey
       .style('stop-opacity', 1);
 
       gradFill.append('stop')
-      .attr('offset', '100%')
-      .style('stop-color', 'grey') //grey
+      .attr('offset', '60%')
+      .style('stop-color', "black") //whitesmoke
       .style('stop-opacity', 1);
 
+      gradFill.append('stop')
+      .attr('offset', '70%')
+      .style('stop-color', color)//lightgrey
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '80%')
+      .style('stop-color', "black") //grey
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '90%')
+      .style('stop-color', color)//lightgrey
+      .style('stop-opacity', 1);
+
+      gradFill.append('stop')
+      .attr('offset', '100%')
+      .style('stop-color', "black") //grey
+      .style('stop-opacity', 1);
 
   return svg;
 }
@@ -237,135 +295,34 @@ function create_gradient_filter_view(svg, color){
         document.onmousemove = null;
     }
 }
+// -45.23018363188316, -21.517547377452868
+// -17.741710887396685, -46.17374349914809
+// -24.18893527847172, -44.44374016484675
+var multi_views = {"Canada":[{"loc":[-123.116226, 49.246292], "radius": 32, "tags":["Vancouver", "Victoria"]},
+                            {"loc":[-74.65217687661148, 45.51990252147928], "radius": 29, "tags":["Montreal", "Ottawa"]}],
+                   "California":[{"loc":[-122.431297, 37.773972], "radius": 40, "tags":["San Jose", "San Francisco", "Oakland"]},
+                            {"loc":[-74.65217687661148, 45.51990252147928], "radius": 29, "tags":["Montreal", "Ottawa"]}],
+                   "South America":[{"loc":[-46.17374349914809,-17.741710887396685], "radius": 30, "tags":['Belo Horizonte','Brasília']},
+                            {"loc":[-44.44374016484675,-24.18893527847172], "radius": 30, "tags":['São Paulo', 'Rio de Janeiro']},
+                            {"loc":[-58.381592, -34.603722], "radius": 25, "tags":['Buenos Aires', "Montevideo"]}]}
 
-function rectCollide() {
-    var nodes,sizes,masses;
-    var strength = 1;
-    var iterations = 1;
-    var nodeCenterX;
-    var nodeMass;
-    var nodeCenterY;
-
-  function force() {
-
-    var node;
-      var i = -1;
-      while (++i < iterations){iterate();}
-    function iterate(){
-          var quadtree = d3.quadtree(nodes, xCenter, yCenter);
-          var j = -1
-          while (++j < nodes.length){
-            node = nodes[j];
-            nodeMass = masses[j];
-            nodeCenterX = xCenter(node);
-            nodeCenterY = yCenter(node);
-            quadtree.visit(collisionDetection);
-            }
-        }
-
-    function collisionDetection(quad, x0, y0, x1, y1) {
-        var updated = false;
-        var data = quad.data;
-        if(data){
-          if (data.index > node.index) {
-
-            let xSize = (node.width + data.width) / 2;
-            let ySize = (node.height + data.height) / 2;
-            let dataCenterX = xCenter(data);
-            let dataCenterY = yCenter(data);
-            let dx = nodeCenterX - dataCenterX;
-            let dy = nodeCenterY - dataCenterY;
-            let absX = Math.abs(dx);
-            let absY = Math.abs(dy);
-            let xDiff = absX - xSize;
-            let yDiff = absY - ySize;
-
-            if(xDiff < 0 && yDiff < 0){
-              //collision has occurred
-
-              //separation vector
-              let sx = xSize - absX;
-              let sy = ySize - absY;
-              if(sx < sy){
-                if(sx > 0){
-                  sy = 0;
-                }
-              }else{
-                if(sy > 0){
-                  sx = 0;
-                }
-              }
-              if (dx < 0){
-                sx = -sx;
-              }
-              if(dy < 0){
-                sy = -sy;
-              }
-
-              let distance = Math.sqrt(sx*sx + sy*sy);
-              let vCollisionNorm = {x: sx / distance, y: sy / distance};
-              let vRelativeVelocity = {x: data.vx - node.vx, y: data.vy - node.vy};
-              let speed = vRelativeVelocity.x * vCollisionNorm.x + vRelativeVelocity.y * vCollisionNorm.y;              
-              if (speed < 0){
-                      //negative speed = rectangles moving away
-              }else{
-                var collisionImpulse = 2*speed / (masses[data.index] + masses[node.index]);
-                if(Math.abs(xDiff) < Math.abs(yDiff)){
-                    //x overlap is less
-                    data.vx -= (collisionImpulse * masses[node.index] * vCollisionNorm.x);
-                    node.vx += (collisionImpulse * masses[data.index] * vCollisionNorm.x);
-                  }else{
-                    //y overlap is less
-                    data.vy -= (collisionImpulse * masses[node.index] * vCollisionNorm.y);
-                    node.vy += (collisionImpulse * masses[data.index] * vCollisionNorm.y);
-                  }
-                  
-                updated = true;
-              }
-            }
-          }
-        }
-      return updated
-  }
-  }//end force
-
-  function xCenter(d) { return d.x + d.vx + sizes[d.index][0] / 2 }
-  function yCenter(d) { return d.y + d.vy + sizes[d.index][1] / 2 }
-
-  force.initialize = function (_) {
-      sizes = (nodes = _).map(function(d){return [d.width,d.height]})
-      masses = sizes.map(function (d) { return d[0] * d[1] })
-  }
-
-force.size = function (_) {
-        return (arguments.length
-             ? (size = typeof _ === 'function' ? _ : constant(_), force)
-             : size)
-    }
-
-force.strength = function (_) {
-    return (arguments.length ? (strength = +_, force) : strength)
-    }
-
-force.iterations = function (_) {
-    return (arguments.length ? (iterations = +_, force) : iterations)
-    }
-
-return force
-}
+var map_settings = {"Central America":{"centre":[-85.587502, 11.934739],"scale":2400}, 
+                    "Norway":{"centre":[10.75224540, 65.91386880],"scale":900},
+                    "Germany":{"centre":[9.682127, 51.110924],"scale":2600},
+                    "Canada":{"centre":[-97.138451, 49.895077],"scale":600}}
 
 var pads = {"Midwest": 50, "Northwest": 120, "Northeast": 20, "Spain":80,"Finland":40,"Switzerland":50,"United Kingdom":20,
 "Germany": 30, "Italy": 20, "Sweden": 50, "South": 110, "Great Lakes": 20, "Southwest": 70, "California": 50, "Southeast":20,
-"Central America": 20};
+"Central America": 20, "Florida": 20, "Poland":10, "United Kingdom":10};
 
 let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "start", "Oakland": "start","Denver":"end", "St. Louis":"start","Santa Fe":"start",
  "Bergen": "end", "Umeå": "start", "Seattle":"start","New York City": "start",  "Boston": "start", "Portland": "top","San Antonio":"end",
   "Hartford":"start", "Trenton": "end", "Houston" : "start", "Dallas" : "start", "Atlanta": "start", "Richmond" : "start", "Cedar Rapids":"start", "Omaha":"end",
   "Miami" : "start", "Tampa" : "end", "New Orleans": "start", "Austin": "end", "Albuquerque":"end", "Corpus Christi":"start",
    "Helsinki":"start", "Berlin":"start", "Essen":"end", "Dortmund":"end", "Waco":"end","Düsseldorf": "end",  "Little Rock":"start","Fort Worth":"end",
-"Santiago" : "end", "Rio de Janeiro":"start", "Belo Horizonte" : "start","Louisville":"end",
+"Santiago" : "end", "Rio de Janeiro":"start", "Belo Horizonte" : "start","Louisville":"end", "Montevideo":"start",
 "Lima": "end", "Bogata": "end", "Detroit": "start", "Cleveland":"start",  "Minneapolis":"start",
-"San Diego":"end",  "Salt Lake City":"end", "Washington":"start",
+"San Diego":"start",  "Salt Lake City":"end", "Washington":"start",'Asunción':'end','São Paulo':'end',
 "Munich":"start",  "Hamburg":"start",  "Sacramento":"start", "Memphis":"end", "Nashville":"end", 
 "London":"start","Newcastle upon Tyne":"start","Birmingham":"end","Liverpool":"end","Belfast":"end", "Kansas City":"end","Colorado Springs":"end","Weil am Rhein":"end",
 'Bonn': 'end','Stuttgart': 'end','Leipzig': 'start', 'Münster': 'end',
@@ -381,15 +338,16 @@ let anchors = {"Los Angeles": "end", "San Francisco": "end", "Long Beach": "star
  'Skellefteå':'start','Halmstad':'end','Borlänge':'end','Gävle':'start','Karlskrona':'start',
  'Tegucigalpa':'top','Guatemala City':'top','Managua':'end','Panama City':'start','San Pedro Sula':'top','Grand Rapids':'top',
  'Fort Wayne':'top','Flint':'top','Madison':'end','Traverse City':'top','Muncie':'start','Marquette':'top','Eureka':'end',
- 'Green Bay':'end','Bellingham':'top','Casper':'start','Billings':'start','Yakima':'top','Cheyenne':'start','Laramie':'end', 'Sheridan':'start', 'Reno':'top', "Modesto":'start'};
+ 'Green Bay':'end','Bellingham':'top','Casper':'start','Billings':'start','Yakima':'top','Cheyenne':'start','Laramie':'end', 'Sheridan':'start', 'Reno':'top', "Modesto":'start',
+"Vancouver":"top","Montreal":"start","Ottawa":"end", 'Quebec City':'top', 'Edmonton':'top'};
 
  let radii = {'Washington, D.C.': 18,'Providence': 20,'Philadelphia': 28,'Pittsburgh': 22,'New York City': 28,'Boston': 20,'Bridgeport': 17,'New Brunswick': 20,'Minneapolis': 25,
  'Arvada': 20,'Greeley': 17,'Kansas City': 20,'Denver': 35,'Iowa City': 20,'Fargo': 20,'Omaha': 20,'St. Louis': 25,'Minot': 20,'Cedar Rapids': 23,'Saint Paul': 20,
  'Pueblo': 20,'Colorado Springs': 20,'Columbia': 20,'Springfield': 20,'Des Moines': 20,'Cedar Rapids': 20,'Fort Collins': 20,'Olathe': 20,'Omaha': 20,'Sioux Falls': 20,
  'Milan': 25,'Rome': 30,'Turin': 25,'Verona': 25,'Udine': 20,'Naples': 25,'Florence': 25,'Catania': 25,'Palermo': 25,
- 'Genoa': 25, 'Lecce':25, "Los Angeles":30, "San Francisco":30, "Oslo":30, "Bergen":25, "Stockholm": 30, 'San José':28,
+ 'Genoa': 25, 'Lecce':25, "Los Angeles":40, "San Francisco":30, "Oslo":30, "Bergen":25, "Stockholm": 30, 'San José':28,
  'Guatemala City':25, 'San Salvador':25, "Chicago":25, "Detroit":22, "Cleveland":22, "Fort Wayne": 22, "Youngstown":18, "Portland":32, "Seattle":32,
- 'Cheyenne':15,'Laramie':15}
+ 'Cheyenne':15,'Laramie':15, 'Toronto':28,'Asunción':16,"San Diego":27, "Sacramento":22, "Tampa":32, "Miami":25}
 
 
 
