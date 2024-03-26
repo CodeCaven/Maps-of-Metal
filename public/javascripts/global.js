@@ -118,6 +118,32 @@ function create_circle_fill(svg, color, baseColor){
     return svg;
 }
 
+function create_circle_fill_spiral(svg, color, baseColor){
+    var gradFill = svg
+      .append('defs')
+      .append('radialGradient')
+      .attr('id', 'circleGradFillSpiral')
+      .attr('spreadMethod', 'reflect')
+      .attr('cx', '75%')
+      .attr('cy', '25%')
+      .attr('r', '33%')
+      .attr('fx', '64%')
+      .attr('fy', '18%')
+      .attr('fr', '17%');
+  
+      gradFill.append('stop')
+      .attr('offset', '0%')
+      .style('stop-color', color)
+      .style('stop-opacity', 1);
+  
+      gradFill.append('stop')
+      .attr('offset', '100%')
+      .style('stop-color', baseColor)
+      .style('stop-opacity', 1);
+  
+      return svg;
+  }
+
 function create_label_fill(svg, baseColor){
     var gradFill = svg
       .append('defs')
@@ -309,7 +335,7 @@ var multi_views = {"Canada":[{"loc":[-123.116226, 49.246292], "radius": 32, "tag
 var map_settings = {"Central America":{"centre":[-85.587502, 11.934739],"scale":2400}, 
                     "Norway":{"centre":[10.75224540, 65.91386880],"scale":900},
                     "Germany":{"centre":[9.682127, 51.110924],"scale":2600},
-                    "Canada":{"centre":[-97.138451, 49.895077],"scale":600}}
+                    "Canada":{"centre":[-97.138451, 49.895077],"scale":700}}
 
 var pads = {"Midwest": 50, "Northwest": 120, "Northeast": 20, "Spain":80,"Finland":40,"Switzerland":50,"United Kingdom":20,
 "Germany": 30, "Italy": 20, "Sweden": 50, "South": 110, "Great Lakes": 20, "Southwest": 70, "California": 50, "Southeast":20,

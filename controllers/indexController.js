@@ -12,14 +12,13 @@ exports.genres = function(req, res) {
    
     // geojson 4 maps
     let mapPlaces = fs.readFileSync("./public/jsons/ne_10m_populated_places.json", 'utf8');
-    let mapStates = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank.json", 'utf8');
-    //let mapStates = fs.readFileSync("./public/jsons/ne_110m_admin_1_states_provinces_lines.json", 'utf8');
-    let mapBoundaries = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries.json", 'utf8');
-    let usCounties = fs.readFileSync("./public/jsons/gz_2010_us_050_00_500k.json", 'utf8');
-    let usStates = fs.readFileSync("./public/jsons/gz_2010_us_040_00_500k.json", 'utf8');
-    let canadaDivs = fs.readFileSync("./public/jsons/canada-divisions.json", 'utf8');
-    let germanDivs = fs.readFileSync("./public/jsons/german-divisions.json", 'utf8');
-    let germanStates = fs.readFileSync("./public/jsons/german-states.json", 'utf8');
+    let mapStates = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced13.json", 'utf8');
+    let mapBoundaries = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries_reduced13.json", 'utf8');
+    let usCounties = fs.readFileSync("./public/jsons/gz_2010_us_050_00_500k_reduced10.json", 'utf8');
+    let usStates = fs.readFileSync("./public/jsons/gz_2010_us_040_00_500k_reduced10.json", 'utf8');
+    let canadaDivs = fs.readFileSync("./public/jsons/canada-divisions_reduced3.json", 'utf8');
+    let germanDivs = fs.readFileSync("./public/jsons/german-divisions_reduced5.json", 'utf8');
+    let germanStates = fs.readFileSync("./public/jsons/german-states_reduced5.json", 'utf8');
 
     // map datastructures
     let metalContinents = fs.readFileSync("./public/jsons/metal_continents.json", 'utf8');
