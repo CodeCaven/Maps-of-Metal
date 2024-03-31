@@ -54,24 +54,26 @@
         let simulation;
         let us_region = "Northeast"; 
         let world_region = "South America"; 
-        let region = "Australia"; // "United States of America" "United Kingdom"
-        let display_region = "World"; // World
-        let grouped_region = false;
+        let region = ""; // "United States of America" "United Kingdom"
+        let display_region = "US"; // World
+        let grouped_region = true;
         let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
-        let current_year = 1979;
-        let cap = 90;
+        let current_year = 1976;
+        let cap = 80;
         let prev_year;
         let nodes = [];
         let links = [];
         let display_bands_list = [];
         let lookup = {};
         let display_bands = {"thrash":false, "black":false, "death":false};
-        let display_genre = "death";
+        let display_genre = "thrash";
         let changes = false;
+        let changes_add = false;
+        let changes_remove = false;
         let image_width = 0;
-        let base_image_width = 120;
+        let base_image_width = 95;
         let min_image_height = 0;
         let max_image_height = 0;
         var timeout = 6000;
@@ -132,6 +134,12 @@
            let unique_cities = world_places.features.map(prop => prop.properties.NAME_EN);
            unique_cities.sort();
            console.log(unique_cities);
+
+           // umique countries
+           let all_countries = world_states.features.map(prop => prop.properties.admin);
+           let unique_countries = [...new Set(all_countries)];
+           unique_countries.sort();
+           console.log(unique_countries);
 
 
            // global units
@@ -227,17 +235,13 @@
             current_year += 1;
             year_display.innerHTML = current_year;
             update_graph_all_genres();
-            //if(timeout <= 4500){timeout += 500;}
             
-            //if(skip_years.includes(current_year)){timeout = 4000;}
-            //else if(current_year <= 1980){timeout = 2000;}
-            //else if(current_year <= 1985){timeout = 6000;}
-            //else{timeout = 8000;}
-            timeout = 10000;
-            //if(current_year >= 2014){timeout = 2000;}
-            //else if(current_year >= 2020){timeout = 10000;}
-            //else{timeout = 10000;}
-            //if(current_year == 1985 || current_year == 1987){timeout = 3000;}
+            if(current_year <= 1982){
+                timeout = 8000;
+            }
+            else{
+                timeout = 13000;
+            }
             animate_timeout = setInterval(myFunction, timeout);
         }
        
@@ -324,6 +328,8 @@
             }
             update_chart();
             changes = false;
+            changes_add = false;
+            changes_remove = false;
          }
 
          //** check functions
@@ -356,6 +362,17 @@
                 }
             }
             return false;
+         }
+
+         // get us state name from fips code
+         function get_name_from_fips(fips){
+            for(let i in us_state_data){
+                if(us_state_data[i]["fips_code"] == fips){
+                    return us_state_data[i]["name"];
+                }
+            }
+            return "";
+
          }
 
          // check if country in world region
@@ -445,6 +462,7 @@
                 if(band == undefined){continue;}
 
                 changes = true;
+                changes_add = true;
 
                 // create nodes (2 for eaach band)
                 var new_base_node = {"id": "base" + genre + band['index'], "type":genre, "nodeType":"base",
@@ -488,6 +506,7 @@
                 links = links.filter(obj => obj.source.id != "base" + genre + band['index']);
 
                 changes = true;
+                changes_remove = true;
             }
          }
 
@@ -644,7 +663,7 @@
             let baseColour = "";
             let boundaryColour = "";
             if(display_genre == "thrash"){ //  bright brown?  https://icolorpalette.com/download/palette/535890_color_palette.jpg
-                mapColour = "darkgoldenrod";  
+                mapColour = "#827717";  
                 baseColour = "lightyellow"; 
                 boundaryColour = "black";
                 
@@ -655,7 +674,7 @@
                 boundaryColour = "black";
             }
             else if(display_genre == "death"){ //  gunmetal
-                mapColour = "#936D58"; 
+                mapColour = "darkslategrey"; 
                 baseColour = "antiquewhite"; 
                 boundaryColour = "black";
                 
@@ -745,15 +764,19 @@
 
                     // background map (states)
                     var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    world_states_background = world_states_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => prop);
 
                     // background map (boundary)
-                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
+                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
+                    world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
                     world_boundaries_background = world_boundaries_background.filter(prop => prop);
 
                     // background us
                     var us_counties_background = us_counties.features.filter(prop => prop.properties.STATE != us_state_data[region]["fips_code"]);
+                    us_counties_background = us_counties_background.filter(prop => neighbours[region].includes(get_name_from_fips(prop.properties.STATE)));
                     var us_boundaries_background = us_states.features.filter(prop => prop.properties.NAME != region);
+                    us_boundaries_background = us_boundaries_background.filter(prop => neighbours[region].includes(prop.properties.NAME));
                 }
 
                 // by region Northeast etc
@@ -771,17 +794,20 @@
                     var display_boundary = us_states.features.filter(prop => in_us_region_name(prop.properties.NAME));
 
                     // background map (states)
-                    var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America"  && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    world_states_background = world_states_background.filter(prop => ["Mexico", "Canada"].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => prop);
 
                     // background map (boundary)
-                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
+                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
+                    world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada"].includes(prop.properties.admin));
                     world_boundaries_background = world_boundaries_background.filter(prop => prop);
 
                     // background us
                     var us_counties_background = us_counties.features.filter(prop => !(in_us_region_fips(prop.properties.STATE)));
+                    us_counties_background = us_counties_background.filter(prop => neighbours[us_region].includes(get_name_from_fips(prop.properties.STATE)));
                     var us_boundaries_background = us_states.features.filter(prop => !(in_us_region_name(prop.properties.NAME)));
-
+                    us_boundaries_background = us_boundaries_background.filter(prop => neighbours[us_region].includes(prop.properties.NAME));
                 }
             }   
             else{ // world states and places
@@ -799,10 +825,12 @@
 
                     // background map (states)
                     var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    world_states_background = world_states_background.filter(prop => neighbours[region].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => prop.properties.admin != region);
 
                     // background map (boundary)
                     var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
+                    world_boundaries_background = world_boundaries_background.filter(prop => neighbours[region].includes(prop.properties.ADMIN));
                     world_boundaries_background = world_boundaries_background.filter(prop => prop.properties.ADMIN != region);
 
                     // background us
@@ -826,10 +854,12 @@
 
                     // background map (states)
                     var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    world_states_background = world_states_background.filter(prop => neighbours[world_region].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => !(in_world_region(prop.properties.admin)));
 
                     // background map (boundary)
                     var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
+                    world_boundaries_background = world_boundaries_background.filter(prop => neighbours[world_region].includes(prop.properties.ADMIN));
                     world_boundaries_background = world_boundaries_background.filter(prop => !(in_world_region(prop.properties.ADMIN)));
 
                     // background us
@@ -980,9 +1010,7 @@
                 }
             }
 
-            // add clip path
-            svg = svg.append('g')
-                .attr("clip-path", "url(#clipID)");
+            // don't use clippath, makes it slower!!
 
             // * WORLD BACKGROUND
             // background world fill states
@@ -1023,42 +1051,44 @@
             
 
             // backgroundfill us counties
-            svg
-            .append("g")
-            .selectAll("counties")
-            .data(us_counties_fixed)
-            .join("path")
-            .attr("d", path)
-            .attr("fill", "url(#circleGradFill)")
-            .attr("fill-opacity", 0.1)
-            .attr("stroke",mapColour) 
-            .attr("class", "world")
-            .attr("stroke-width", function(d){
-                return  0.5;
-            }) 
-            .attr("stroke-opacity", function(d){
-                    return 0;
-            });
+            if(region == "Canada" || region == "Mexico" || display_region == "US"){
+                svg
+                .append("g")
+                .selectAll("counties")
+                .data(us_counties_fixed)
+                .join("path")
+                .attr("d", path)
+                .attr("fill", "url(#circleGradFill)")
+                .attr("fill-opacity", 0.1)
+                .attr("stroke",mapColour) 
+                .attr("class", "world")
+                .attr("stroke-width", function(d){
+                    return  0.5;
+                }) 
+                .attr("stroke-opacity", function(d){
+                        return 0;
+                });
 
-            // background us states stroke 
-            svg
-            .append("g")
-            .selectAll("stateboundaries")
-            .data(us_boundaries_fixed)
-            .join("path")
-            .attr("d", path)
-            .attr("fill", "none")
-            .attr("stroke","black") 
-            .attr("class", "world")
-            .attr("stroke-width", function(d){
-                return  1;
-            }) 
-            .attr("stroke-opacity", function(d){
-                    return 0.5;
-            });
+                // background us states stroke 
+                svg
+                .append("g")
+                .selectAll("stateboundaries")
+                .data(us_boundaries_fixed)
+                .join("path")
+                .attr("d", path)
+                .attr("fill", "none")
+                .attr("stroke","black") 
+                .attr("class", "world")
+                .attr("stroke-width", function(d){
+                    return  1;
+                }) 
+                .attr("stroke-opacity", function(d){
+                        return 0.5;
+                });
+            }
 
             // background canada (only seen from us)
-            if(region !== "Canada"){
+            if(display_region == "US" && region != "California"){
                 svg
                 .append("g")
                 .selectAll("backdivisions")
@@ -1339,7 +1369,7 @@
         var no_nodes = nodes.length/2; // account for base nodes
         image_width = base_image_width - Math.ceil(no_nodes/20)*10; // decrease every 14
         min_image_height = image_width/4;
-        max_image_height = image_width/2;
+        max_image_height = image_width/1.4;
 
         var node = svg.append("g").selectAll("images")
         .data(nodes, d => d.id)
@@ -1387,21 +1417,21 @@
 
         
         //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
-        simulation = d3.forceSimulation(nodes).velocityDecay(0.6)//.alphaMin(0.5)//.alphaDecay(0.01)//.velocityDecay(0.4)//.alpha(0.1)..velocityDecay(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
-            .force("link", d3.forceLink(links).id(d => d.id).strength(0.4))
+        simulation = d3.forceSimulation(nodes).velocityDecay(0.5)//.alphaMin(0.5)//.alphaDecay(0.01)//.velocityDecay(0.4)//.alpha(0.1)..velocityDecay(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+            .force("link", d3.forceLink(links).id(d => d.id).strength(0.1))
             .force("collide", d3.forceCollide().radius(function(d){
                 if(d['nodeType'] == 'band'){
                     if(d.width >= d.height){
-                        return d.width/2 + 10;
+                        return d.width/2 + 5;
                     }
                     else{
-                        return d.height/2 + 10;
+                        return d.height/2 + 5;
                     }
                 }
                 else{
-                    return 25;
+                    return 15;
                 }
-            }).strength(0.2))
+            }).strength(0.3))
             .force("boundary", forceBoundary(0, 0, width, height-100).strength(0.05)) // 0.005
             .on("tick.ticked", ticked);
         
@@ -1483,11 +1513,17 @@
             //console.log(nodes);
             //console.log(links);
 
+            // set transition for remove but no add
+            var trans_time = 4000;
+            if(changes_remove && !(changes_add)){
+                trans_time = 2000;
+            }
+
             // set image width
             var no_nodes = nodes.length/2; // account for base nodes
             image_width = base_image_width - Math.ceil(no_nodes/20)*10; // 60 - 140
             min_image_height = image_width/4;
-            max_image_height = image_width/2;
+            max_image_height = image_width/1.4;
             //console.log(image_width + " image width");
 
             // let the speed function know its animating
@@ -1506,7 +1542,7 @@
             // update existing nodes..HERE transition without data
             if(changes){
                 base_node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(2000).style("opacity", 0)
+                .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
                 .transition().duration(3000).style("opacity", 1);
             }
 
@@ -1629,7 +1665,7 @@
 
                 // transition
                 node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(2000).style("opacity", 0)
+                .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
                 .transition().duration(3000).style("opacity", 1);
 
                 // resize
@@ -1718,7 +1754,7 @@
             // update existing
             if(changes){
                 link.data(links, function(d) { return d.source.id + "-" + d.target.id; })
-                .style("opacity", 0).transition().duration(2000).style("opacity", 0)
+                .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
                 .transition().duration(3000).style("opacity", 1);
             }
             
@@ -1742,26 +1778,26 @@
                 .merge(link);
         
                 if(changes){
-                    simulation
-                        .force("link", d3.forceLink(links).id(d => d.id).strength(0.4))
+                    simulation.velocityDecay(0.5)
+                        .force("link", d3.forceLink(links).id(d => d.id).strength(0.1))
                         .force("collide", d3.forceCollide().radius(function(d){
                         if(d['nodeType'] == 'band'){
                             
                             if(d.width >= d.height){
-                                return d.width/2 + 10;
+                                return d.width/2 + 5;
                             }
                             else{
-                                return d.height/2 + 10;
+                                return d.height/2 + 5;
                             }
                         }
                         else{
-                            return 25;
+                            return 15;
                         }
-                    }).strength(0.2));
+                    }).strength(0.3));
 
                     // regen sim
                     simulation.nodes(nodes);
-                    simulation.alpha(0.3).restart().tick();
+                    simulation.alpha(0.8).restart().tick();
                     ticked(); // render now!
                 }
                 

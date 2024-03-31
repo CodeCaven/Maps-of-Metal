@@ -33,7 +33,7 @@ a {
 #controls{
   position:absolute;
   top:50px;
-  right:100px;
+  right:130px;
   width:220px;
   letter-spacing: 4px;
   color:"black";
@@ -44,7 +44,6 @@ a {
   font-family: 'Wendy One', sans-serif;
   font-size: 80px;
   border-radius: 15px;
-  padding:5px;
   -webkit-text-stroke: 3px white;
    color:transparent;
   
@@ -64,7 +63,7 @@ a {
 #genreContainer{
   position:absolute;
   top:50px;
-  left:100px;
+  left:130px;
   width:200px;
   opacity:0.8;
   background-color: rgba(0,0,0,0);
