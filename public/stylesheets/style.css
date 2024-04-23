@@ -32,7 +32,7 @@ a {
 
 #controls{
   position:absolute;
-  top:50px;
+  top:50px; /* canada 20px*/
   right:130px;
   width:220px;
   letter-spacing: 4px;
@@ -62,17 +62,17 @@ a {
 
 #genreContainer{
   position:absolute;
-  top:50px;
+  top:380px;/* top 50px bottom 380px canada 410px*/
   left:130px;
   width:200px;
-  opacity:0.8;
+  opacity:1;
   background-color: rgba(0,0,0,0);
 
 }
 
 #regionContainer{
   position:absolute;
-  top:480px;
+  top:50px;
   right:100px;
   width:200px;
   background-color: rgba(0,0,0,0);
@@ -103,5 +103,10 @@ a {
   text-shadow: 2px 2px gray;
 }
 
+.from{
+  font-family: "Luckiest Guy", cursive;
+  color:white;
+  font-size: 50px;
+}
 
 

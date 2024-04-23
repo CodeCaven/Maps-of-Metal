@@ -17,6 +17,7 @@
     <link href="https://fonts.cdnfonts.com/css/metal-lord" rel="stylesheet"><!--font-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Honk"><!--Google font-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Permanent+Marker"><!--Google font-->
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Wendy+One&display=swap" rel="stylesheet">
@@ -31,12 +32,15 @@
         let death_bands = JSON.parse(<%-JSON.stringify(ejs_death_bands)%>);
         let world_places = JSON.parse(<%-JSON.stringify(ejs_places)%>);
         let world_states = JSON.parse(<%-JSON.stringify(ejs_states)%>);
+        let world_states_back = JSON.parse(<%-JSON.stringify(ejs_states_back)%>);
         let world_regions = JSON.parse(<%-JSON.stringify(ejs_world_regions)%>);
         let world_boundaries = JSON.parse(<%-JSON.stringify(ejs_map_countries)%>);
+        let world_boundaries_back = JSON.parse(<%-JSON.stringify(ejs_map_countries_back)%>);
         let us_counties = JSON.parse(<%-JSON.stringify(ejs_counties)%>);
         let us_states = JSON.parse(<%-JSON.stringify(ejs_us_states)%>);
         let canada_divisions = JSON.parse(<%-JSON.stringify(ejs_can_divs)%>);
         let german_divisions = JSON.parse(<%-JSON.stringify(ejs_german_divs)%>);
+        let uk_divisions = JSON.parse(<%-JSON.stringify(ejs_uk_divs)%>);
         let german_states = JSON.parse(<%-JSON.stringify(ejs_german_states)%>);
         let metal_continents = JSON.parse(<%-JSON.stringify(ejs_continents)%>);
         let us_state_data = JSON.parse(<%-JSON.stringify(ejs_state_data)%>);
@@ -52,16 +56,16 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = "Northeast"; 
-        let world_region = "South America"; 
-        let region = ""; // "United States of America" "United Kingdom"
+        let us_region = "South"; 
+        let world_region = "Central America"; 
+        let region = "Florida"; // "United States of America" "United Kingdom"
         let display_region = "US"; // World
         let grouped_region = true;
         let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
-        let current_year = 1976;
-        let cap = 80;
+        let current_year = 1981;
+        let cap = 95; // norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
         let prev_year;
         let nodes = [];
         let links = [];
@@ -73,7 +77,7 @@
         let changes_add = false;
         let changes_remove = false;
         let image_width = 0;
-        let base_image_width = 95;
+        let base_image_width = 90;
         let min_image_height = 0;
         let max_image_height = 0;
         var timeout = 6000;
@@ -86,7 +90,7 @@
                 // map view settings from object
                 if(region in map_settings){
                     var mapView = map_settings[region];
-                    return d3.geoMercator()
+                    return d3.geoMercator() // geoMercator
                         .center(mapView.centre)
                         .translate([width/2, height/2])
                         .scale(mapView.scale);
@@ -141,7 +145,13 @@
            unique_countries.sort();
            console.log(unique_countries);
 
-
+           // umique russian districts (for filtering)
+           let all_russia = world_states.features.filter(prop => prop.properties.admin == "Russia");
+           all_russia_names = all_russia.map(prop => prop.properties.name);
+           let unique_russia = [...new Set(all_russia_names)];
+           unique_russia.sort();
+           console.log(unique_russia);
+           
            // global units
            vhu = parseFloat(window.innerHeight/100);
            vwu = parseFloat(window.innerWidth/100);
@@ -193,6 +203,7 @@
 
            // init draggable controls
            dragElement(document.getElementById("controls"));
+           dragElement(document.getElementById("genreContainer"));
 
            // set background 
            document.body.style.backgroundColor = "black";
@@ -221,7 +232,7 @@
 
          // varying time interval animation
          var myFunction = function(){
-            var skip_years = [2014, 2015, 2017, 2022, 2023];
+            var skip_years = [];
             clearInterval(animate_timeout);
             if(timeout == 0){
                 timeout = 3000;
@@ -236,8 +247,14 @@
             year_display.innerHTML = current_year;
             update_graph_all_genres();
             
-            if(current_year <= 1982){
-                timeout = 8000;
+            if(skip_years.includes(current_year)){
+                timeout = 3000;
+            }
+            else if(current_year <= 1988){
+                timeout = 9000;
+            }
+            else if(current_year <= 2003){
+                timeout = 10000;
             }
             else{
                 timeout = 13000;
@@ -461,6 +478,8 @@
                 // lookup has all of world, filter first?
                 if(band == undefined){continue;}
 
+                if(band['genre'] == 'made'){continue;} // skipping made
+
                 changes = true;
                 changes_add = true;
 
@@ -518,6 +537,7 @@
             for(let band of bands){
 
                 if(indexes.includes(band['index'])){
+                    if(band['genre'] == 'made'){continue;} // skipping made
                     
                     // create nodes (2 for eaach band) and link
                     var new_base_node = {"id": "base" + genre + band['index'], "type":genre, "nodeType":"base",
@@ -697,7 +717,7 @@
             }
             else{ // all metal.
                 mapColour = "#444243"; // onyx
-                baseColour = "lighteblue"; // whitesmoke
+                baseColour = "lightblue"; // whitesmoke
             }
 
             
@@ -763,13 +783,23 @@
                     var display_boundary = us_states.features.filter(prop => prop.properties.NAME == region);
 
                     // background map (states)
-                    var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
-                    world_states_background = world_states_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
+                    var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    if(region == "Florida"){
+                        world_states_background = world_states_background.filter(prop => ["The Bahamas"].includes(prop.properties.admin));
+                    }
+                    else{
+                        world_states_background = world_states_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
+                    }
                     world_states_background = world_states_background.filter(prop => prop);
 
                     // background map (boundary)
-                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
-                    world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
+                    var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
+                    if(region == "Florida"){
+                        world_boundaries_background = world_boundaries_background.filter(prop => ["The Bahamas"].includes(prop.properties.admin));
+                    }
+                    else{
+                        world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
+                    }
                     world_boundaries_background = world_boundaries_background.filter(prop => prop);
 
                     // background us
@@ -794,13 +824,23 @@
                     var display_boundary = us_states.features.filter(prop => in_us_region_name(prop.properties.NAME));
 
                     // background map (states)
-                    var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America"  && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
-                    world_states_background = world_states_background.filter(prop => ["Mexico", "Canada"].includes(prop.properties.admin));
+                    var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America"  && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    if(us_region == "Southeast"){
+                        world_states_background = world_states_background.filter(prop => ["The Bahamas"].includes(prop.properties.admin));
+                    }
+                    else{
+                        world_states_background = world_states_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
+                    }
                     world_states_background = world_states_background.filter(prop => prop);
 
                     // background map (boundary)
-                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
-                    world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada"].includes(prop.properties.admin));
+                    var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
+                    if(us_region == "Southeast"){
+                        world_boundaries_background = world_boundaries_background.filter(prop => ["The Bahamas"].includes(prop.properties.admin));
+                    }
+                    else{
+                        world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
+                    }
                     world_boundaries_background = world_boundaries_background.filter(prop => prop);
 
                     // background us
@@ -824,12 +864,29 @@
                     var display_boundary = world_boundaries.features.filter(prop => prop.properties.ADMIN == region);
 
                     // background map (states)
-                    var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
                     world_states_background = world_states_background.filter(prop => neighbours[region].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => prop.properties.admin != region);
 
+                    // filter russia oblasks ???
+                    var russian_districts = ["Arkhangel'sk", "Murmansk"];
+
+                    // reverse loop to remove items
+                    /*
+                    let i = world_states_background.length;
+                    while (i--) {
+                        if(world_states_background[i].properties.admin == "Russia"){
+                            if(!(russian_districts.includes(world_states_background[i].properties.name))){
+                                world_states_background.splice(i,1);
+                            };
+                        }
+
+                    }
+                    */
+                    
+
                     // background map (boundary)
-                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
+                    var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
                     world_boundaries_background = world_boundaries_background.filter(prop => neighbours[region].includes(prop.properties.ADMIN));
                     world_boundaries_background = world_boundaries_background.filter(prop => prop.properties.ADMIN != region);
 
@@ -840,7 +897,13 @@
 
                 // by world region 
                 if(grouped_region){
-                    var display_states = world_states.features.filter(prop => in_world_region(prop.properties.admin));
+                    if(world_region == "South America"){ // add france to map for french guiana
+                        var display_states = world_states.features.filter(prop => in_world_region(prop.properties.admin) || prop.properties.admin == "France");
+                    }
+                    else{
+                        var display_states = world_states.features.filter(prop => in_world_region(prop.properties.admin));
+                    }
+                    
                     try{
                         var places_points = world_places.features.filter(prop => in_world_region(prop.properties.ADM0NAME));
                         places_points = places_points.filter(prop => views[world_region]["cities"].includes(prop.properties.NAME_EN));
@@ -850,15 +913,21 @@
                         var places_points = world_places.features.filter(prop => in_world_region(prop.properties.ADM0NAME) && prop.properties.POP_MAX > pop_max);
                     }
 
-                    var display_boundary = world_boundaries.features.filter(prop => in_world_region(prop.properties.ADMIN));
+                    if(world_region == "South America"){ // add france to map for french guiana
+                        var display_boundary = world_boundaries.features.filter(prop => in_world_region(prop.properties.ADMIN) || prop.properties.ADMIN == "France");
+                    }
+                    else{
+                        var display_boundary = world_boundaries.features.filter(prop => in_world_region(prop.properties.ADMIN));
+                    }
+                    
 
                     // background map (states)
-                    var world_states_background = world_states.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
+                    var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
                     world_states_background = world_states_background.filter(prop => neighbours[world_region].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => !(in_world_region(prop.properties.admin)));
 
                     // background map (boundary)
-                    var world_boundaries_background = world_boundaries.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
+                    var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
                     world_boundaries_background = world_boundaries_background.filter(prop => neighbours[world_region].includes(prop.properties.ADMIN));
                     world_boundaries_background = world_boundaries_background.filter(prop => !(in_world_region(prop.properties.ADMIN)));
 
@@ -931,6 +1000,12 @@
                     return turf.rewind(f,{reverse:true});
             });
 
+            // turf unwind features for plot and filter out null geoms
+            uk_divisions = uk_divisions.features.filter(feature => feature.geometry !== null);
+            var fixed_divisions_uk = uk_divisions.map(function(f) {
+                    return turf.rewind(f,{reverse:true});
+            });
+
            
             // get and set current projection
             if(display_region == "World"){
@@ -992,9 +1067,81 @@
                     places_points.push(new_point);
 
                 }
+                if(region == "France"){ // 43.94844784183787, 4.801667696564574
+                    var new_point = {"geometry":{"coordinates":[4.801667696564574, 43.94844784183787]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Avignon", "POP_MAX": 100000000}}
+                    places_points.push(new_point); // 48.27712676623403, -2.899193307406238
+
+                    var new_point = {"geometry":{"coordinates":[-2.899193307406238, 48.27712676623403]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Merléac", "POP_MAX": 100000000}}
+                    places_points.push(new_point); // 49.35653378461303, 6.200709899332349
+
+                    var new_point = {"geometry":{"coordinates":[6.200709899332349, 49.35653378461303]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Yutz", "POP_MAX": 100000000}}
+                    places_points.push(new_point); // 49.35653378461303, 6.200709899332349
+
+                }
                 if(us_region == "Northwest"){
                     var new_point = {"geometry":{"coordinates":[-106.9553 , 44.7913]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Sheridan", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                } //'latitude': 61.329791, 'longitude': 6.72036476
+
+                if(region == "Norway"){
+                    var new_point = {"geometry":{"coordinates":[6.72036476 , 61.329791]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Sogndal", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    // 'latitude': 59.7985899, 'longitude': 6.294994955666921 59.284073, 11.109403
+                    var new_point = {"geometry":{"coordinates":[6.294994955666921 , 59.7985899]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Etne", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[11.109403 , 59.284073]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Sarpsborg", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+                }
+
+                if(region == "Sweden"){ // 61.000890767124574, 14.516857230494425
+                    var new_point = {"geometry":{"coordinates":[14.516857230494425, 61.000890767124574]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Dalarna", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                } //'latitude': 61.329791, 'longitude': 6.72036476
+            }
+
+            // add custome points (not in json)
+            if(display_bands["death"]){
+                if(region == "Florida"){ 
+                    var new_point = {"geometry":{"coordinates":[-81.5311887228028, 27.75285782385015]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Florida", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+                    // 39.960313260273445, -74.20616167301641
+                if(us_region == "Northeast" && display_region == "US" && grouped_region){ 
+                    var new_point = {"geometry":{"coordinates":[-74.20616167301641, 39.960313260273445]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "New Jersey", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(region == "Poland"){ // 50.81007234316473, 19.116577576411775 54.4633673805736, 17.029505761553008
+                    var new_point = {"geometry":{"coordinates":[19.116577576411775, 50.81007234316473]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Częstochowa", "POP_MAX": 100000000}}
+                    places_points.push(new_point); // 50.01133453601809, 20.98651561367258
+
+                    var new_point = {"geometry":{"coordinates":[17.029505761553008, 54.4633673805736]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Słupsk", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[20.98651561367258, 50.01133453601809]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Tarnów", "POP_MAX": 100000000}}
+                    places_points.push(new_point); // 53.014127643296106, 18.599138416553455
+
+                    var new_point = {"geometry":{"coordinates":[18.599138416553455, 53.014127643296106]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Toruń', "POP_MAX": 100000000}}
                     places_points.push(new_point);
 
                 }
@@ -1013,6 +1160,7 @@
             // don't use clippath, makes it slower!!
 
             // * WORLD BACKGROUND
+
             // background world fill states
             svg
             .append("g")
@@ -1021,18 +1169,22 @@
             .join("path")
             .attr("d", path)
             .attr("fill", "url(#circleGradFill)")
-            .attr("fill-opacity", 0.1)
+            .attr("fill-opacity", function(d){
+                if(display_genre == "thrash"){return 0.1;}
+                return 0.15;
+            }) // 0.15
             .attr("stroke",mapColour) 
             .attr("class", "world")
             .attr("stroke-width", function(d){
-                return  0.5;
+                return  0.5; // 0.5
             }) 
             .attr("stroke-opacity", function(d){
-                    return 0;
+                    return 0.8; // 0.8
             });
-            
 
             // background world stroke countries
+            // no country stroke
+            /*
             svg
             .append("g")
             .selectAll("world_boundaries")
@@ -1046,12 +1198,14 @@
                 return  1;
             }) 
             .attr("stroke-opacity", function(d){
-                    return 0.5;
+                    return 1;
             });
+            */
             
 
             // backgroundfill us counties
             if(region == "Canada" || region == "Mexico" || display_region == "US"){
+                
                 svg
                 .append("g")
                 .selectAll("counties")
@@ -1059,17 +1213,22 @@
                 .join("path")
                 .attr("d", path)
                 .attr("fill", "url(#circleGradFill)")
-                .attr("fill-opacity", 0.1)
+                .attr("fill-opacity", function(d){
+                    if(display_genre == "thrash"){return 0.1;}
+                    return 0.15;
+                })
                 .attr("stroke",mapColour) 
                 .attr("class", "world")
                 .attr("stroke-width", function(d){
                     return  0.5;
                 }) 
                 .attr("stroke-opacity", function(d){
-                        return 0;
+                        return 0.8;
                 });
+                
 
-                // background us states stroke 
+                // background us states stroke (remove when not needed)
+                
                 svg
                 .append("g")
                 .selectAll("stateboundaries")
@@ -1083,12 +1242,16 @@
                     return  1;
                 }) 
                 .attr("stroke-opacity", function(d){
-                        return 0.5;
+                    if(region == "Florida" && !(grouped_region) && display_region=="US"){return 0;}
+                    if(region == "Canada"){return 0;}
+                    return 1;
+                        
                 });
+                
             }
 
             // background canada (only seen from us)
-            if(display_region == "US" && region != "California"){
+            if(display_region == "US" && region != "California" && region != "Florida"){
                 svg
                 .append("g")
                 .selectAll("backdivisions")
@@ -1096,10 +1259,13 @@
                 .join("path")
                 .attr("d", path)
                 .attr("fill","url(#circleGradFill)")
-                .attr("fill-opacity", 0.1)
+                .attr("fill-opacity", function(d){
+                    if(display_genre == "thrash"){return 0.1;}
+                    return 0.15;
+                })
                 .attr("stroke", mapColour)
                 .attr("stroke-width", 0.5)
-                .attr("stroke-opacity", 0)
+                .attr("stroke-opacity", 0.8)
                 .attr("class", "statearea");
             }
 
@@ -1139,9 +1305,9 @@
                 if(region == "Canada" && display_region == "World" && !(grouped_region)){return 'none';}
                 return  "url(#circleGradFill)"; //"url(#circleGradFill)";
             }) 
-            .attr("fill-opacity",0.7)
+            .attr("fill-opacity",0.7)// 0.7
             .attr("stroke", function(d){
-                if(region == "Canada" && display_region == "World" && !(grouped_region)){return 'black';}
+                if(region == "Canada" && display_region == "World" && !(grouped_region)){return "var(--bs-dark)";}
                 return mapColour;
             })
             .attr("stroke-width", function(d){
@@ -1150,26 +1316,51 @@
             }) 
             .attr("stroke-opacity", function(d){
                 if(region == "Canada" && display_region == "World" && !(grouped_region)){return 0.5;}
-                return 0.5;
+                return 0.5; 
             })
             .attr("class", "statearea");
 
             // boundaries b/w countries
-            svg
-            .append("g")
-            .selectAll("boundary")
-            .data(fixed_boundary_states)
-            .join("path")
-            .attr("d", path)
-            .attr("fill", 'none')
-            .attr("stroke", boundaryColour) 
-            .attr("class", "boundary")
-            .attr("stroke-width", function(d){
-                return  1;
-            }) 
-            .attr("stroke-opacity", function(d){
-                return 0.5;
-            });
+            if(grouped_region || region == "Germany"){
+                svg
+                .append("g")
+                .selectAll("boundary")
+                .data(fixed_boundary_states)
+                .join("path")
+                .attr("d", path)
+                .attr("fill", 'none')
+                .attr("stroke", "var(--bs-dark)") 
+                .attr("class", "boundary")
+                .attr("stroke-width", function(d){
+                    return  1;
+                }) 
+                .attr("stroke-opacity", function(d){
+                    return 0.5;
+                });
+            }
+            
+            if(region == "United Kingdom" && display_region == "World" && !(grouped_region)){
+                
+                // counties or states
+                svg
+                .append("g")
+                .selectAll("ukpath")
+                .data(fixed_divisions_uk)
+                .join("path")
+                .attr("d", path)
+                .attr("fill", 'none') 
+                .attr("stroke", function(d){
+                    return "var(--bs-dark)";
+                })
+                .attr("stroke-width", function(d){
+                    return  1;
+                }) 
+                .attr("stroke-opacity", function(d){
+                    return 0.5;
+                })
+                .attr("class", "statearea");
+
+            }
 
             // circle city markers
             svg
@@ -1260,7 +1451,19 @@
             .enter()
             .append("rect")
             .attr("class", "maprect")
-            .attr("x", function(d){
+            .attr("x", function(d){ //
+                if(d.properties.NAME_EN == 'San Jose'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0];
+                }
+                if(d.properties.NAME_EN == 'Brasília'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - 3*d.bbox.width/4;
+                }
+                if(d.properties.NAME_EN == 'Essen'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width;
+                }
+                if(d.properties.NAME_EN == 'Düsseldorf'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width;
+                }
                 if(!(d.properties.NAME_EN in anchors)){ // middle default
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2;
                 }
@@ -1273,6 +1476,18 @@
                 return current_projection(d.geometry.coordinates)[0]  - d['radius'] - (d.bbox.width) - xMargin/2;
             })
             .attr("y", function(d){
+                if(d.properties.NAME_EN == 'Belo Horizonte'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 17;
+                }
+                if(d.properties.NAME_EN == 'Ottawa'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] - 10;
+                }
+                if(d.properties.NAME_EN == 'Montreal'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 10;
+                }
+                if(d.properties.NAME_EN == 'Rio de Janeiro'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] - 10;
+                }
                 if(!(d.properties.NAME_EN in anchors)){ // middle default
                     return current_projection(d.geometry.coordinates)[1] + d['radius'] + d.bbox.height/2 + yMargin;
                 }
@@ -1282,9 +1497,9 @@
                 if(anchors[d.properties.NAME_EN] == "top"){
                     return current_projection(d.geometry.coordinates)[1] - d['radius'] - yMargin;
                 };
-                if(d.properties.NAME_EN == 'São Paulo'){ // adjust for south america  view 
-                    return current_projection(d.geometry.coordinates)[1] - 10;
-                }
+                //if(d.properties.NAME_EN == 'São Paulo'){ // adjust for south america  view 
+                    //return current_projection(d.geometry.coordinates)[1] - 10;
+                //}
                 return current_projection(d.geometry.coordinates)[1];
             })
             .attr("width", d => d.bbox.width + 2 * xMargin)
@@ -1311,6 +1526,18 @@
             .attr("x", d => current_projection(d.geometry.coordinates)[0])
             .attr("y", d => current_projection(d.geometry.coordinates)[1])
             .attr("dx", function(d){
+                if(d.properties.NAME_EN == 'San Jose'){ // adjust 
+                    return d.bbox.width/2;
+                }
+                if(d.properties.NAME_EN == 'Brasília'){ // adjust 
+                    return -3*d.bbox.width/4; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Essen'){ // adjust 
+                    return - d.bbox.width;
+                }
+                if(d.properties.NAME_EN == 'Düsseldorf'){ // adjust 
+                    return - d.bbox.width/2;
+                }
                 if(!(d.properties.NAME_EN in anchors)){ // middle default
                     return 0;
                 }
@@ -1323,6 +1550,18 @@
                 return -1*d['radius'] - xMargin/2; // end
             })
             .attr("dy", function(d){
+                if(d.properties.NAME_EN == 'Belo Horizonte'){ // adjust 
+                    return 17;
+                }
+                if(d.properties.NAME_EN == 'Ottawa'){ // adjust 
+                    return - 10;
+                }
+                if(d.properties.NAME_EN == 'Montreal'){ // adjust 
+                    return  10;
+                }
+                if(d.properties.NAME_EN == 'Rio de Janeiro'){ // adjust 
+                    return -10;
+                }
                 if(!(d.properties.NAME_EN in anchors)){ // middle default
                     return d['radius'] + d.bbox.height/2 + yMargin;
                 }
@@ -1332,9 +1571,9 @@
                 if(anchors[d.properties.NAME_EN] == "top"){
                     return -1*d['radius'] - yMargin;
                 };
-                if(d.properties.NAME_EN == 'São Paulo'){ // adjust for south america  view 
-                    return -10;
-                }
+                //if(d.properties.NAME_EN == 'São Paulo'){ // adjust for south america  view 
+                    //return -10;
+                //}
                 return 0; // end
             })
             //.attr("stroke", function(){
@@ -1429,9 +1668,9 @@
                     }
                 }
                 else{
-                    return 15;
+                    return 19;
                 }
-            }).strength(0.3))
+            }).strength(0.4))
             .force("boundary", forceBoundary(0, 0, width, height-100).strength(0.05)) // 0.005
             .on("tick.ticked", ticked);
         
@@ -1481,7 +1720,6 @@
             
            
             // source is base
-            // HERE: set image height initially amd remove y2 code below
             link
             .attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
@@ -1791,9 +2029,9 @@
                             }
                         }
                         else{
-                            return 15;
+                            return 19;
                         }
-                    }).strength(0.3));
+                    }).strength(0.4));
 
                     // regen sim
                     simulation.nodes(nodes);

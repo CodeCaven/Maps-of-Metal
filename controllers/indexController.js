@@ -12,19 +12,23 @@ exports.genres = function(req, res) {
    
     // geojson 4 maps
     let mapPlaces = fs.readFileSync("./public/jsons/ne_10m_populated_places.json", 'utf8');
-    let mapStates = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced10.json", 'utf8');
-    let mapBoundaries = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries_reduced10.json", 'utf8');
-    let usCounties = fs.readFileSync("./public/jsons/gz_2010_us_050_00_500k_reduced13.json", 'utf8');
-    let usStates = fs.readFileSync("./public/jsons/gz_2010_us_040_00_500k_reduced13.json", 'utf8');
+    let mapStates = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced20.json", 'utf8');
+    let mapBoundaries = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries_reduced20.json", 'utf8');
+    let mapStatesBack = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced10.json", 'utf8');
+    let mapBoundariesBack = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries_reduced20.json", 'utf8');
+    let usCounties = fs.readFileSync("./public/jsons/gz_2010_us_050_00_500k_reduced5.json", 'utf8');
+    let usStates = fs.readFileSync("./public/jsons/gz_2010_us_040_00_500k_reduced5.json", 'utf8');
     let canadaDivs = fs.readFileSync("./public/jsons/canada-divisions_reduced_half_percent.json", 'utf8');
-    let germanDivs = fs.readFileSync("./public/jsons/german-divisions_reduced5.json", 'utf8');
-    let germanStates = fs.readFileSync("./public/jsons/german-states_reduced5.json", 'utf8');
+    let germanDivs = fs.readFileSync("./public/jsons/german-divisions_reduced2.json", 'utf8');
+    let ukDivs = fs.readFileSync("./public/jsons/uk-divisions-reduced4.json", 'utf8');
+    let germanStates = fs.readFileSync("./public/jsons/german-states_reduced2.json", 'utf8');
 
     // map datastructures
     let metalContinents = fs.readFileSync("./public/jsons/metal_continents.json", 'utf8');
     let usStateData = fs.readFileSync("./public/jsons/us_state_data.json", 'utf8');
     let worldRegions = fs.readFileSync("./public/jsons/world-regions.json", 'utf8');
-    // "Guinea Bissau" added to world regions (Africa) since Deathy Metal processing
+    // "Guinea Bissau" "Swaziland" added to world regions (Africa) since Deathy Metal processing
+    // "S. Sudan" is south sudan in the geojson
     
     res.render('index', { ejs_thrash_bands: thrashBandsJson, 
                           ejs_black_bands: blackBandsJson,
@@ -33,12 +37,15 @@ exports.genres = function(req, res) {
                           ejs_state_data: usStateData,
                           ejs_places: mapPlaces,
                           ejs_states: mapStates,
+                          ejs_states_back:mapStatesBack,
                           ejs_counties: usCounties,
                           ejs_us_states: usStates,
                           ejs_can_divs: canadaDivs,
+                          ejs_uk_divs: ukDivs,
                           ejs_german_divs: germanDivs,
                           ejs_german_states: germanStates,
                           ejs_world_regions: worldRegions,
+                          ejs_map_countries_back: mapBoundariesBack,
                           ejs_map_countries: mapBoundaries});
 
     
