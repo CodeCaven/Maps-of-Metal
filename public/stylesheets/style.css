@@ -32,7 +32,7 @@ a {
 
 #controls{
   position:absolute;
-  top:50px; /* canada 20px*/
+  top:50px; /* canada australia 20px*/
   right:130px;
   width:220px;
   letter-spacing: 4px;
@@ -62,8 +62,8 @@ a {
 
 #genreContainer{
   position:absolute;
-  top:380px;/* top 50px bottom 380px canada 410px*/
-  left:130px;
+  top:380px;/* top 50px bottom 380px canada 410px australia 430px*/
+  left:130px; 
   width:200px;
   opacity:1;
   background-color: rgba(0,0,0,0);
