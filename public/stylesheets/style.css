@@ -33,7 +33,7 @@ a {
 #controls{
   position:absolute;
   top:50px; /* canada australia 20px*/
-  right:130px;
+  right:130px; /*malaysia 430px, rest 130px*/
   width:220px;
   letter-spacing: 4px;
   color:"black";

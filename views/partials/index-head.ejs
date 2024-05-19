@@ -57,23 +57,23 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = ""; 
+        let us_region = "South"; 
         let world_region = ""; 
-        let region = "Florida"; // "United States of America" "United Kingdom"
+        let region = ""; // "United States of America" "United Kingdom"
         let display_region = "US"; // World
-        let grouped_region = false;
+        let grouped_region = true;
         let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
-        let current_year = 1977;
-        let cap = 80; // south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
+        let current_year = 1980;
+        let cap = 90; // south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
         let prev_year;
         let nodes = [];
         let links = [];
         let display_bands_list = [];
         let lookup = {};
         let display_bands = {"thrash":false, "black":false, "death":false};
-        let display_genre = "death";
+        let display_genre = "thrash";
         let changes = false;
         let changes_add = false;
         let changes_remove = false;
@@ -240,7 +240,7 @@
          // varying time interval animation
          var myFunction = function(){
             var skip_years_init = [];
-            var skip_years = [1985,2023];
+            var skip_years = [1997, 2003];
             clearInterval(animate_timeout);
             if(timeout == 0){
                 timeout = 3000;
@@ -256,15 +256,18 @@
             update_graph_all_genres();
             
             if(skip_years_init.includes(current_year)){
-                timeout = 2000;
+                timeout = 4000;
             }
             else if(skip_years.includes(current_year)){
                 timeout = 3000;
             }
-            else if(current_year <= 1990){
+            else if(current_year <= 2005){
                 timeout = 9000;
             }
-            else if(current_year <= 2011){
+            else if(current_year <= 2012){
+                timeout = 13000;
+            }
+            else if(current_year <= 2020){
                 timeout = 13000;
             }
             else{
@@ -641,7 +644,7 @@
             }
 
             let zoom = d3.zoom()
-                .scaleExtent([0.5, 20])
+                .scaleExtent([0.1, 200])
                 .on('zoom', zoomed);
 
             // append the svg object to the plot area
@@ -795,8 +798,8 @@
 
                     // background map (states)
                     var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
-                    if(region == "Florida"){
-                        world_states_background = world_states_background.filter(prop => ["The Bahamas"].includes(prop.properties.admin));
+                    if(region == "California"){
+                        world_states_background = world_states_background.filter(prop => ["Mexico"].includes(prop.properties.admin));
                     }
                     else{
                         world_states_background = world_states_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
@@ -805,8 +808,8 @@
 
                     // background map (boundary)
                     var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
-                    if(region == "Florida"){
-                        world_boundaries_background = world_boundaries_background.filter(prop => ["The Bahamas"].includes(prop.properties.admin));
+                    if(region == "California"){
+                        world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico"].includes(prop.properties.admin));
                     }
                     else{
                         world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
@@ -836,8 +839,8 @@
 
                     // background map (states)
                     var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America"  && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
-                    if(us_region == "Great Lakes"){
-                        world_states_background = world_states_background.filter(prop => ["Canada"].includes(prop.properties.admin));
+                    if(us_region == "South"){
+                        world_states_background = world_states_background.filter(prop => ["Mexico"].includes(prop.properties.admin));
                     }
                     else{
                         world_states_background = world_states_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
@@ -846,8 +849,8 @@
 
                     // background map (boundary)
                     var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America"  && prop.properties.ADMIN != "Antarctica");
-                    if(us_region == "Great Lakes"){
-                        world_boundaries_background = world_boundaries_background.filter(prop => ["Canada"].includes(prop.properties.admin));
+                    if(us_region == "South"){
+                        world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico"].includes(prop.properties.admin));
                     }
                     else{
                         world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
@@ -937,6 +940,22 @@
                     var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
                     world_states_background = world_states_background.filter(prop => neighbours[world_region].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => !(in_world_region(prop.properties.admin)));
+
+                    // filter russia oblasks ???
+                    var russian_districts = ["Astrakhan'","Sevastopol", "Crimea", "Rostov", "Adygey","Krasnodar", "Stavropol'", "Kabardin-Balkar", "Karachay-Cherkess","Dagestan","Chechnya","Kalmyk", "Ingush", "North Ossetia"];
+                    
+                    // reverse loop to remove item
+                    let i = world_states_background.length;
+                    while (i--) {
+                        if(world_states_background[i].properties.admin == "Russia"){
+                            if(!(russian_districts.includes(world_states_background[i].properties.name))){
+                                world_states_background.splice(i,1);
+                            };
+                        }
+
+                    }
+                    
+                    
 
                     // background map (boundary)
                     var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
@@ -1150,6 +1169,13 @@
 
                 }
 
+                if(region == "Malaysia"){
+                    var new_point = {"geometry":{"coordinates":[102.5994547,  3.6168822]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Pahang", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
                 if(region == "United Kingdom"){
                     var new_point = {"geometry":{"coordinates":[-1.466667, 52.916668]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Derby", "POP_MAX": 100000000}}
@@ -1251,6 +1277,20 @@
                 if(world_region == "Middle East" && grouped_region){ 
                     var new_point = {"geometry":{"coordinates":[27.142826, 38.423733]}, // any pop max its scaled
                             "properties":{"NAME_EN": "İzmir", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(world_region == "South Asia" && grouped_region){ 
+                    var new_point = {"geometry":{"coordinates":[73.53966432958072, 4.437813800000001]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Maldives", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(world_region == "Africa" && grouped_region){ 
+                    var new_point = {"geometry":{"coordinates":[57.490768, -20.294079]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Mauritius", "POP_MAX": 100000000}}
                     places_points.push(new_point);
 
                 }
@@ -1385,7 +1425,7 @@
                 
 
                 // background us states stroke (remove when not needed)
-                /*
+                
                 svg
                 .append("g")
                 .selectAll("stateboundaries")
@@ -1404,12 +1444,12 @@
                     return 1;
                         
                 });
-                */
+                
                 
             }
 
             // background canada (only seen from us)
-            if(display_region == "US" && region != "California" && region != "Florida" && us_region != "Southwest"){
+            if(display_region == "US" && region != "California" && region != "Florida" && us_region != "Southwest" && us_region != "South"){
                 svg
                 .append("g")
                 .selectAll("backdivisions")
@@ -1645,8 +1685,20 @@
                 if(d.properties.NAME_EN == 'Brasília'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - 3*d.bbox.width/4;
                 }
+                if(d.properties.NAME_EN == 'Jakata'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 7;
+                }
+                if(d.properties.NAME_EN == 'Dhaka'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 30;
+                }
+                if(d.properties.NAME_EN == 'Bandung'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 9;
+                }
                 if(d.properties.NAME_EN == 'Essen'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width;
+                }
+                if(d.properties.NAME_EN == 'Providence'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 10;
                 }
                 if(d.properties.NAME_EN == 'Düsseldorf'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width;
@@ -1668,6 +1720,24 @@
                 }
                 if(d.properties.NAME_EN == 'Ottawa'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] - 10;
+                }
+                if(d.properties.NAME_EN == 'Pune'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 12;
+                }
+                if(d.properties.NAME_EN == 'Dhaka'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] - d['radius'] - yMargin + 5;
+                }
+                if(d.properties.NAME_EN == 'Bloemfontein'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 12;
+                }
+                if(d.properties.NAME_EN == 'Durban'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 15;
+                }
+                if(d.properties.NAME_EN == 'Chittagong'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 12;
+                }
+                if(d.properties.NAME_EN == 'Long Island'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 12;
                 }
                 if(d.properties.NAME_EN == 'Cheltenham'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] - 5;
@@ -1731,8 +1801,20 @@
                 if(d.properties.NAME_EN == 'Brasília'){ // adjust 
                     return -3*d.bbox.width/4; // because there is no top anchor
                 }
+                if(d.properties.NAME_EN == 'Jakata'){ // adjust 
+                    return -d.bbox.width/2 - 7; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Dhaka'){ // adjust 
+                    return -d.bbox.width/2 - 30; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Bandung'){ // adjust 
+                    return 9; // because there is no top anchor
+                }
                 if(d.properties.NAME_EN == 'Essen'){ // adjust 
                     return - d.bbox.width;
+                }
+                if(d.properties.NAME_EN == 'Providence'){ // adjust 
+                    return 10;
                 }
                 if(d.properties.NAME_EN == 'Düsseldorf'){ // adjust 
                     return - d.bbox.width/2;
@@ -1754,6 +1836,24 @@
                 }
                 if(d.properties.NAME_EN == 'Ottawa'){ // adjust 
                     return - 10;
+                }
+                if(d.properties.NAME_EN == 'Pune'){ // adjust 
+                    return 12;
+                }
+                if(d.properties.NAME_EN == 'Dhaka'){ // adjust 
+                    return -1*d['radius'] - yMargin + 5;
+                }
+                if(d.properties.NAME_EN == 'Durban'){ // adjust 
+                    return 15;
+                }
+                if(d.properties.NAME_EN == 'Chittagong'){ // adjust 
+                    return 12;
+                }
+                if(d.properties.NAME_EN == 'Bloemfontein'){ // adjust 
+                    return 12;
+                }
+                if(d.properties.NAME_EN == 'Long Island'){ // adjust 
+                    return 12;
                 }
                 if(d.properties.NAME_EN == 'Cheltenham'){ // adjust 
                     return - 5;
@@ -2246,7 +2346,7 @@
 
                     // regen sim
                     simulation.nodes(nodes);
-                    simulation.alpha(0.8).restart().tick();
+                    simulation.alpha(1).restart().tick();
                     ticked(); // render now!
                 }
                 
