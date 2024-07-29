@@ -10,10 +10,20 @@
         <div id="genreContainer">
           <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
           <div id="genreContainerheader" class="genreContainerheader" data-mdb-toggle="collapse" data-mdb-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">
-            <hr class="regionHR">
-            <h1 id="genreHeader" class="text-center">Thrash Metal</h1>
-            <hr class="regionHR">
+            <h4 id="nameDisplay" class="text-center short-display"></h4>
+            <img id="bandLogo">
+            
+            
           </div>
+        </div>
+        <div id="bandInfo">
+          
+          <div class="from text-center">Started</div>
+          <div id="yearDisplay" class="text-center"></div>
+          <br>
+          <div class="from text-center">Origin</div>
+          <div id="originDisplay" class="text-center short-display"></div>
+          <hr class="regionHR">
         </div>
          <!--region header-->
          <div id="regionContainer">
@@ -26,18 +36,16 @@
           <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
           <div id="controlsheader" class="controlsheader" data-mdb-toggle="collapse" data-mdb-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">
               
-              <hr class="regionHR">
-              <div style="display:none;" class="from text-center">Since</div>
-              <div id="yearDisplay" class="text-center"></div>
-              <div style="display:none;" class="from text-center">in</div>
+              <!--<div id="yearDisplay" class="text-center"></div>-->
+              <h1 id="genreHeader" class="text-center">Thrash Metal</h1>
+              
               <h4 id="regionDisplay" class="text-center"></h4>
-              <hr class="regionHR">
               
               <div id="yearControl" class="btn-group" role="group" aria-label="Basic example" style="display:none">
                 <button id="left" type="button" class="btn btn-dark"><<</button>
                 <button id="right" type="button" class="btn btn-dark">>></button>
               </div>
-              <br>
+              
         </div>
        </div>
 

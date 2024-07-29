@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Wendy+One&display=swap" rel="stylesheet">
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/style-shorts.css' />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/translucent.css"/>
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css"/>
     <script type="text/javascript">
@@ -30,6 +30,8 @@
         let thrash_bands = JSON.parse(<%-JSON.stringify(ejs_thrash_bands)%>);
         let black_bands = JSON.parse(<%-JSON.stringify(ejs_black_bands)%>);
         let death_bands = JSON.parse(<%-JSON.stringify(ejs_death_bands)%>);
+        let power_bands = JSON.parse(<%-JSON.stringify(ejs_power_bands)%>);
+        let speed_bands = JSON.parse(<%-JSON.stringify(ejs_speed_bands)%>);
         let world_places = JSON.parse(<%-JSON.stringify(ejs_places)%>);
         let world_states = JSON.parse(<%-JSON.stringify(ejs_states)%>);
         let world_states_back = JSON.parse(<%-JSON.stringify(ejs_states_back)%>);
@@ -57,22 +59,22 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = "South"; 
+        let us_region = ""; // see death_data 4 midwest international bands when SHORTS
         let world_region = ""; 
-        let region = ""; // "United States of America" "United Kingdom"
-        let display_region = "US"; // World
-        let grouped_region = true;
+        let region = "Brazil"; // "United States of America" "United Kingdom"
+        let display_region = "World"; // World
+        let grouped_region = false;
         let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
         let current_year = 1980;
-        let cap = 90; // south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
+        let cap = 85; // southeast asia death 77,greece 77 south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
         let prev_year;
         let nodes = [];
         let links = [];
         let display_bands_list = [];
         let lookup = {};
-        let display_bands = {"thrash":false, "black":false, "death":false};
+        let display_bands = {"thrash":false, "black":false, "death":false, "power":false, "speed":false};
         let display_genre = "thrash";
         let changes = false;
         let changes_add = false;
@@ -81,10 +83,12 @@
         let base_image_width = 95;
         let min_image_height = 0;
         let max_image_height = 0;
-        var timeout = 6000;
+        var timeout = 12000;
         var views;
         let animate = false;
         let map_region;
+        let bi = 0; // band index for shorts
+        let short_start = false;
         
         let projections = {getProjection: function(region, width, height, fixed_states){
 
@@ -123,6 +127,8 @@
            console.log(thrash_bands);
            console.log(black_bands);
            console.log(death_bands);
+           console.log(power_bands);
+           console.log(speed_bands);
            console.log(world_places);
            console.log(world_states);
            console.log(world_regions);
@@ -137,6 +143,13 @@
            // add middle eastern disputed territories
            world_regions["Middle East"].push("West Bank");
            world_regions["Middle East"].push("Northern Cyprus");
+
+           // add Czechia Republic
+           world_regions["Central Europe"].push("Czech Republic");
+
+           // add Republic of Serbia
+           world_regions["The Balkans"].push("Republic of Serbia");
+           world_regions["The Balkans"].push("Macedonia");
 
            // remove yemen and oman (no bands)
            world_regions["Middle East"] = world_regions["Middle East"].filter(item => item != "Yemen" && item != "Oman")
@@ -170,10 +183,10 @@
            document.getElementById("plot_div").style.height = "98vh";
 
            // event listeners
-           document.getElementById('yearControl').addEventListener("click", handleYear);
+           document.getElementById('yearControl').addEventListener("click", handleNewBand);
 
            // set year and area display
-           document.getElementById("yearDisplay").innerHTML = current_year;
+           //document.getElementById("yearDisplay").innerHTML = current_year;
            if(!(grouped_region)){
                 document.getElementById("regionDisplay").innerHTML = region.toUpperCase();
            }
@@ -204,6 +217,12 @@
            else if(display_bands["death"]){
             views = death_views;
             genre_display.innerHTML = "Death Metal"}
+           else if(display_bands["power"]){
+            views = power_views;
+            genre_display.innerHTML = "Power Metal"}
+           else if(display_bands["speed"]){
+            views = power_views;
+            genre_display.innerHTML = "speed Metal"}
            else{
             views = black_views;
             genre_display.innerHTML = "Black Metal"}
@@ -219,6 +238,31 @@
            display_bands_list = create_bands_list();
            lookup = create_lookup(display_bands_list);
 
+           // filter bands here Trono, Tsala
+           var omit_bands = ["Trono", "Tsalal", "Kat", "Vestígio"];
+           display_bands_list = display_bands_list.filter(band => !omit_bands.includes(band.name));
+        
+           // sort bands list (local or world) ['active_years'][0]
+           display_bands_list.sort(function(a, b) { 
+                //return a.local_rank - b.local_rank;
+                return a['active_years'][0] - b['active_years'][0];
+            })
+
+            // add channel nodes here
+            var channel_node_1 = JSON.parse(JSON.stringify(display_bands_list[0]));
+            channel_node_1['name'] = 'Watch the Animation';
+            channel_node_1['image_size'] = [461,279];
+
+             // add channel nodes at midpoint and end
+            var channel_node_2 = JSON.parse(JSON.stringify(display_bands_list[0]));
+            channel_node_2['name'] = 'Watch the Animation';
+            channel_node_2['image_size'] = [461,279];
+
+            display_bands_list.splice(Math.floor(cap/2),0,channel_node_1);
+            display_bands_list.push(channel_node_2);
+
+            console.log(display_bands_list);
+
            // set map region
            if(display_region == "World"){
             if(grouped_region){map_region = world_region;}
@@ -230,50 +274,202 @@
            }
             
            draw_map();
-           update_chart();
+           display_shorts_band();
+           //update_chart();
            
            // start animation
-           animate_timeout = setInterval(myFunction, timeout);
+           setTimeout(function(){
+            animate_timeout = setInterval(myFunction, timeout);
+           }, 25000);
+           
 
          }, false);
 
+         function display_channel(){
+
+            // show band info
+            document.getElementById("bandInfo").style.display = "none";
+
+            // set channel logo
+            var logo_path = "/images/new-log-raw_mod.png";
+            var band_image_tag = document.getElementById('bandLogo');
+            band_image_tag.setAttribute("src", logo_path);
+            band_image_tag.setAttribute("width", 176);
+
+            // channel plug
+            var band_name_tag = document.getElementById('nameDisplay');
+            band_name_tag.innerHTML = "See the Animation";
+
+            d3.select("#genreContainerheader").style("opacity", 0)
+            .transition().duration(500).style("opacity", 1);
+
+         }
+
+         // draw a band logo and info
+         function display_shorts_band(){
+
+            // show band info
+            document.getElementById("bandInfo").style.display = "none";
+
+            // get current index band
+            var band = display_bands_list[bi];
+
+            // handle channel 'nodes'
+            var channel = false;
+            if(band['name'] == "Watch the Animation"){
+                // hide band info
+                document.getElementById("bandInfo").style.display = "none";
+                channel = true;
+            }
+
+            // band logo
+            var logo_path = "/logos_transparent/" + band['genre'] + 
+            "/"+ band['local_region'] + "/" + band.logo;
+
+            // channel image path
+            if(channel){
+                var logo_path = "/images/new-log-raw_mod.png";
+            }
+
+           
+            // logo width
+            // set from image wwidth and adjust
+            var image_width = 196;
+            var max_image_height =  100;
+            var image_size = band['image_size'];
+            var image_height = (image_width/image_size[0]) * image_size[1];
+            var tall = false;
+
+            if(image_height > max_image_height){
+                image_width = (max_image_height/image_size[1]) * image_size[0];
+                tall = true;
+            
+            }
+            
+            // set image size and container size
+            var band_image_tag = document.getElementById('bandLogo');
+            band_image_tag.style.display = "none";
+            document.getElementById("genreContainerheader").style.opacity = 0;
+            document.getElementById("genreContainerheader").style.width =  image_width+"px";
+            band_image_tag.setAttribute("width", image_width); // set by size of container and padding
+            
+
+            // set genreContainer left based from controls for tall images
+            if(tall){
+                var controls_div =  document.getElementById("controls");
+                var controls_bbox = controls_div.getBoundingClientRect();
+
+                var middle =  controls_bbox.x + controls_bbox.width/2;
+                document.getElementById("genreContainer").style.left = (middle - image_width/2 - 12) + "px";
+
+                // change font size
+                document.getElementById("nameDisplay").style.fontSize = "1rem";
+
+                // set height and width (stretch option)
+                var stretch_bands = ["Cattle Decapitation", "Nithing"];
+                if(stretch_bands.includes(band['name'])){
+                    document.getElementById("genreContainerheader").style.width =  "172px";
+                    document.getElementById("genreContainer").style.left = (middle - 172/2 - 12) + "px";
+                    band_image_tag.setAttribute("height", max_image_height);
+                    band_image_tag.setAttribute("width", 172);
+                }
+                
+            }
+            else{ // default left
+                document.getElementById("genreContainer").style.left = "45%";
+
+                // change font size back
+                document.getElementById("nameDisplay").style.fontSize = "1.5rem";
+            }
+            
+            // set logo path
+            band_image_tag.setAttribute("src", logo_path);
+            band_image_tag.style.display = "block";
+
+            // band name
+            var band_name_tag = document.getElementById('nameDisplay');
+            band_name_tag.innerHTML = band['name'];
+            
+            // year started
+            var band_year_tag = document.getElementById('yearDisplay');
+            band_year_tag.innerHTML = band['active_years'][0];
+
+            // origin 
+            var band_year_tag = document.getElementById('originDisplay');
+            band_year_tag.innerHTML = band['origin_str'].replace("Portland, Oregon", "Oregon");
+
+            // reshow
+            if(!(channel)){
+                // show band info
+                document.getElementById("bandInfo").style.display = "block";
+            }
+
+            d3.select("#bandLogo").style("opacity", 0)
+            .transition().duration(400).style("opacity", 1);
+
+            d3.select("#nameDisplay").style("opacity", 0)
+            .transition().duration(400).style("opacity", 1);
+            
+            d3.select("#genreContainerheader").style("opacity", 0)
+            .transition().duration(400).style("opacity", 1);
+
+            /* UPDATE MAP */
+            // add to nodes and links
+            var genre = display_genre; // back compat with main code
+            var new_base_node = {"id": "base" + display_genre + band['index'], "type":display_genre, "nodeType":"base",
+                                    "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
+                                    "fx": current_projection([band['loc']['longitude'], band['loc']['latitude']])[0],
+                                    "fy": current_projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                    "x": current_projection([band['loc']['longitude'], band['loc']['latitude']])[0],
+                                    "y": current_projection([band['loc']['longitude'], band['loc']['latitude']])[1],
+                                    "image_size": band["image_size"], "name": band["name"], "genre": band["genre"], "local_region":band["local_region"]};
+
+            // logo position
+            var image_tag = document.getElementById('bandLogo');
+            var image_box = image_tag.getBoundingClientRect();
+            var logo_x =  image_box.x + image_box.width/2;
+            var logo_y =  image_box.y + image_box.height/2;
+
+            var new_band_node = {"id": "band" + genre + band['index'], "type":genre, "nodeType":"band",
+                    "lat":band['loc']['latitude'], "long":band['loc']['longitude'], "logo": band['logo'],
+                    "fx": logo_x,
+                    "fy": logo_y,
+                    "x": logo_x,
+                    "y": logo_y,
+                    "image_size": band["image_size"], "origin": band['origin'], "name": band["name"], "genre": band["genre"], "local_region":band["local_region"]};
+
+            var new_link = {"source":"base" + genre + band['index'], 
+                        "target":"band" + genre + band['index'],
+                        "type":genre, "image_size": band["image_size"], "name": band["name"]};
+
+            links = []; // reset           
+            if(!(channel)){
+                
+                nodes.push(new_base_node);
+                nodes.push(new_band_node);
+                links.push(new_link);
+            }
+            
+            // draw chart
+            update_chart();
+
+         }
+
          // varying time interval animation
          var myFunction = function(){
-            var skip_years_init = [];
-            var skip_years = [1997, 2003];
-            clearInterval(animate_timeout);
-            if(timeout == 0){
-                timeout = 3000;
-                return;} // stop from handle year
-            if(current_year == 2024){
-                clearInterval(animate_timeout);
-                return;}
-            // update the map
-            var year_display = document.getElementById("yearDisplay");
-            prev_year = current_year;
-            current_year += 1;
-            year_display.innerHTML = current_year;
-            update_graph_all_genres();
             
-            if(skip_years_init.includes(current_year)){
-                timeout = 4000;
-            }
-            else if(skip_years.includes(current_year)){
-                timeout = 3000;
-            }
-            else if(current_year <= 2005){
-                timeout = 9000;
-            }
-            else if(current_year <= 2012){
-                timeout = 13000;
-            }
-            else if(current_year <= 2020){
-                timeout = 13000;
-            }
-            else{
-                timeout = 13000;
-            }
+            clearInterval(animate_timeout);
+            
+            // update the map
+            bi += 1;
+            if(bi >= cap + 2){  // plus 2 for channel nodes
+                return;}
+            
+            display_shorts_band();
+            
+            timeout = 1325;
             animate_timeout = setInterval(myFunction, timeout);
+            
         }
        
         
@@ -292,6 +488,19 @@
          }
 
          /* EVENT HANDLERS*/
+         function handleNewBand(event){
+
+            // get direction and handle
+            var direction = event.target.id;
+
+            // next band
+            bi += 1;
+            if(bi >= cap - 1){return;}
+            display_shorts_band();
+
+
+
+         }
          function handleYear(event){
 
             // stop animation
@@ -342,6 +551,14 @@
             if(display_bands["death"]){
                 create_graph(current_projection, lookup, display_bands_list, "death");
             }
+
+            if(display_bands["power"]){
+                create_graph(current_projection, lookup, display_bands_list, "power");
+            }
+
+            if(display_bands["speed"]){
+                create_graph(current_projection, lookup, display_bands_list, "speed");
+            }
     
          }
 
@@ -356,6 +573,14 @@
 
             if(display_bands["death"]){
                 update_graph(current_projection, lookup, display_bands_list, "death");
+            }
+
+            if(display_bands["power"]){
+                update_graph(current_projection, lookup, display_bands_list, "power");
+            }
+
+            if(display_bands["speed"]){
+                update_graph(current_projection, lookup, display_bands_list, "speed");
             }
             update_chart();
             changes = false;
@@ -435,6 +660,12 @@
             else if(display_genre == "death"){
                 var search_bands = death_bands;
             }
+            else if(display_genre == "power"){
+                var search_bands = power_bands;
+            }
+            else if(display_genre == "speed"){
+                var search_bands = speed_bands;
+            }
             else{
                 var search_bands = black_bands;
             }
@@ -455,6 +686,7 @@
                 }
 
             }
+
             return bands;
          }
 
@@ -640,7 +872,7 @@
             function zoomed(event) {
                 const {transform} = event;
                 svg.attr("transform", transform);
-                //svg.attr("stroke-width", 1 / transform.k);
+                //svg.attr("stroke-width", 1 / transform.k);  
             }
 
             let zoom = d3.zoom()
@@ -716,22 +948,27 @@
             else if(display_genre == "power"){//  crystal teal
                 mapColour = "#00637c"; 
                 baseColour = "beige";
+                boundaryColour = "black";
             }
             else if(display_genre == "speed"){ //  
                 mapColour = "#775E59"; //  light brown
                 baseColour = "cornsilk";
+                boundaryColour = "black";
             }
             else if(display_genre == "heavy"){  // vintage violet
                 mapColour = "#634f62"; 
                 baseColour = "honeydew";
+                boundaryColour = "black";
             }
             else if(display_genre == "groove"){ // darkslategrey
                 mapColour = "darkslategrey";
                 baseColour = "linen";
+                boundaryColour = "black";
             }
             else{ // all metal.
                 mapColour = "#444243"; // onyx
                 baseColour = "lightblue"; // whitesmoke
+                boundaryColour = "black";
             }
 
             
@@ -753,14 +990,14 @@
 
             // set display backgrounds
             //document.getElementById("yearDisplay").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
-            document.getElementById("yearDisplay").style.webkitTextStroke  = "3px " + "whitesmoke";
-            document.getElementById("yearDisplay").style.textShadow  = "2px 2px 5px " + baseColour;
+            //document.getElementById("yearDisplay").style.webkitTextStroke  = "3px " + "whitesmoke";
+            //document.getElementById("yearDisplay").style.textShadow  = "2px 2px 5px " + baseColour;
             //document.getElementById("regionDisplay").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
             document.getElementById("regionDisplay").style.webkitTextStroke  = "1px " + "whitesmoke";
             //document.getElementById("regionDisplay").style.textShadow  = "2px 2px 5px " + mapColour;
             //document.getElementById("genreHeader").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
             //document.getElementById("genreHeader").style.color = baseColour;
-            document.getElementById("genreHeader").style.webkitTextStroke  = "1px " + "whitesmoke";
+            //document.getElementById("genreHeader").style.webkitTextStroke  = "1px " + "whitesmoke";
             document.getElementById("genreHeader").style.textShadow  = "2px 2px 0px " + mapColour;
 
             var hrs = document.getElementsByClassName('regionHR');
@@ -815,6 +1052,7 @@
                         world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
                     }
                     world_boundaries_background = world_boundaries_background.filter(prop => prop);
+                    
 
                     // background us
                     var us_counties_background = us_counties.features.filter(prop => prop.properties.STATE != us_state_data[region]["fips_code"]);
@@ -856,12 +1094,13 @@
                         world_boundaries_background = world_boundaries_background.filter(prop => ["Mexico", "Canada", "The Bahamas"].includes(prop.properties.admin));
                     }
                     world_boundaries_background = world_boundaries_background.filter(prop => prop);
+                   
 
                     // background us
                     var us_counties_background = us_counties.features.filter(prop => !(in_us_region_fips(prop.properties.STATE)));
-                    us_counties_background = us_counties_background.filter(prop => neighbours[us_region].includes(get_name_from_fips(prop.properties.STATE)));
+                    //us_counties_background = us_counties_background.filter(prop => neighbours[us_region].includes(get_name_from_fips(prop.properties.STATE)));
                     var us_boundaries_background = us_states.features.filter(prop => !(in_us_region_name(prop.properties.NAME)));
-                    us_boundaries_background = us_boundaries_background.filter(prop => neighbours[us_region].includes(prop.properties.NAME));
+                    //us_boundaries_background = us_boundaries_background.filter(prop => neighbours[us_region].includes(prop.properties.NAME));
                 }
             }   
             else{ // world states and places
@@ -897,7 +1136,6 @@
 
                     }
                     */
-                    
                     
 
                     // background map (boundary)
@@ -938,13 +1176,15 @@
 
                     // background map (states)
                     var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
-                    world_states_background = world_states_background.filter(prop => neighbours[world_region].includes(prop.properties.admin));
+                    //world_states_background = world_states_background.filter(prop => neighbours[world_region].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => !(in_world_region(prop.properties.admin)));
 
                     // filter russia oblasks ???
-                    var russian_districts = ["Astrakhan'","Sevastopol", "Crimea", "Rostov", "Adygey","Krasnodar", "Stavropol'", "Kabardin-Balkar", "Karachay-Cherkess","Dagestan","Chechnya","Kalmyk", "Ingush", "North Ossetia"];
-                    
+                    //var russian_districts = ["Astrakhan'","Sevastopol", "Crimea", "Rostov", "Adygey","Krasnodar", "Stavropol'", "Kabardin-Balkar", "Karachay-Cherkess","Dagestan","Chechnya","Kalmyk", "Ingush", "North Ossetia"];
+                    var russian_districts = ["Moskovsskaya","Orel","Tula","Kaluga", "City of St. Petersburg", "Vologda", "Leningrad","Novgorod", "Kaliningrad","Pskov","Smolensk","Tver'","Bryansk","Kursk"];
+
                     // reverse loop to remove item
+                    /*
                     let i = world_states_background.length;
                     while (i--) {
                         if(world_states_background[i].properties.admin == "Russia"){
@@ -954,12 +1194,13 @@
                         }
 
                     }
+                    */
                     
-                    
+                
 
                     // background map (boundary)
                     var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
-                    world_boundaries_background = world_boundaries_background.filter(prop => neighbours[world_region].includes(prop.properties.ADMIN));
+                    //world_boundaries_background = world_boundaries_background.filter(prop => neighbours[world_region].includes(prop.properties.ADMIN));
                     world_boundaries_background = world_boundaries_background.filter(prop => !(in_world_region(prop.properties.ADMIN)));
 
                     // background us
@@ -1068,15 +1309,23 @@
 
             // ** CUSTOM MARKERS
 
-            // remove jacksonsville north carlonia and duplicate kansas city
+            // remove jacksonsville north carlonia and duplicate kansas city,denpasar
             let test_points = [];
             let kans_bool = false;
+            let denp_bool = false;
+            console.log(places_points);
             for(let place of places_points){
                 if(!(place['properties']['ADM1NAME'] == 'North Carolina' && place['properties']['NAME'] == "Jacksonville")){
                     if(place['properties']['NAME'] == "Kansas City"){
                         if(!(kans_bool)){
                             test_points.push(place);
                             kans_bool = true;
+                        }
+                    }
+                    else if(place['properties']['NAME_EN'] == "Denpasar"){
+                        if(!(denp_bool)){
+                            test_points.push(place);
+                            denp_bool = true;
                         }
                     }
                     else{
@@ -1117,6 +1366,93 @@
                     
                 }
 
+                if(region == "Italy"){
+
+                    //var new_point = {"geometry":{"coordinates":[12.568333, 44.0594448]}, // any pop max its scaled
+                            //"properties":{"NAME_EN": "Rimini", "POP_MAX": 100000000}}
+                    //places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[13.45293,43.29789]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Macerata", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[13.583333,37.316666]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Agrigento", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(region == "Switzerland"){
+                    var new_point = {"geometry":{"coordinates":[8.84393, 47.29426]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Hinwil", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[9.1, 47.56667]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Weinfelden", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[8.94534, 46.01562]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Massagno", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[ 7.200, 46.967]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Kerzers", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    
+                }
+
+                if(region == "Greece"){
+                    var new_point = {"geometry":{"coordinates":[22.944860, 37.940880]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Corinth", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+                    
+                }
+
+                if(region == "Sweden"){
+                    var new_point = {"geometry":{"coordinates":[12.49118, 56.90552]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Falkenberg", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+                    
+                }
+
+                if(region == "Netherlands"){
+                    var new_point = {"geometry":{"coordinates":[5.6589, 53.03297]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Sneek", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[6.7194, 51.9725 ]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Winterswijk", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[6.89583, 52.21833 ]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Enschede", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[5.4441391, 51.6017723 ]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "North Brabant", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[5.98154, 50.88365 ]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Heerlen", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[5.0913, 51.55551 ]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Tilburg", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[6.4625, 52.363611111111 ]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Nijverdal", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[6.47639, 52.7225 ]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Hoogeveen", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+
+                    
+                }
+
                 if(region == "Japan"){
             
                     var new_point = {"geometry":{"coordinates":[131.47139, 34.18583]}, // any pop max its scaled
@@ -1135,7 +1471,7 @@
 
                     var new_point = {"geometry":{"coordinates":[10.18527, 47.98372]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Memmingen", "POP_MAX": 100000000}}
-                    places_points.push(new_point);
+                    //places_points.push(new_point); // removed 4 shorts
 
                     var new_point = {"geometry":{"coordinates":[11.392927956697605, 48.949926990226636]}, // any pop max its scaled
                             "properties":{"NAME_EN": 'Kipfenberg', "POP_MAX": 100000000}}
@@ -1158,6 +1494,39 @@
 
                     var new_point = {"geometry":{"coordinates":[12.568333, 44.0594448]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Rimini", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(region == "Hungary"){
+                    var new_point = {"geometry":{"coordinates":[21.20444226702809, 48.159066469060676]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Szerencs', "POP_MAX": 100000000}}
+                    places_points.push(new_point);// 48.159066469060676, 21.20444226702809
+
+                    var new_point = {"geometry":{"coordinates":[17.800604789362115, 46.04883837149812]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Szigetvár', "POP_MAX": 100000000}}
+                    places_points.push(new_point);// 46.04883837149812, 17.800604789362115
+
+                    var new_point = {"geometry":{"coordinates":[17.365300998804337, 46.226055403380336]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Nagyatád', "POP_MAX": 100000000}}
+                    places_points.push(new_point);// 46.226055403380336, 17.365300998804337
+
+                    var new_point = {"geometry":{"coordinates":[16.99104, 46.45347]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Nagykanizsa', "POP_MAX": 100000000}}
+                    places_points.push(new_point);// 46.226055403380336, 17.365300998804337
+                }
+
+                if(region == "Colombia"){
+                    var new_point = {"geometry":{"coordinates":[-76.5224, 3.45686]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Cali", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[-77.2726, 1.21369]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Pasto", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[-75.51444, 10.39972]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Cartagena", "POP_MAX": 100000000}}
                     places_points.push(new_point);
 
                 }
@@ -1224,7 +1593,18 @@
 
                 }
 
-                if(us_region == "Great Lakes"){
+                if(us_region == "Northeast" && display_region == "US" && grouped_region){ 
+                    var new_point = {"geometry":{"coordinates":[-74.20616167301641, 39.960313260273445]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "New Jersey", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[-77.7278831, 40.9699889]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Pennsylvania", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(us_region == "Great Lakes" && display_region == "US" && grouped_region){
                     var new_point = {"geometry":{"coordinates":[-88.757355 , 41.930370]}, // any pop max its scaled
                             "properties":{"NAME_EN": "DeKalb", "POP_MAX": 100000000}}
                     places_points.push(new_point);
@@ -1234,6 +1614,37 @@
                     places_points.push(new_point);
 
                 } //'latitude': 61.329791, 'longitude': 6.72036476
+
+                if(world_region == "North Asia"){
+                    var new_point = {"geometry":{"coordinates":[114.177216 , 22.302711]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Hong Kong", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[135.484802 , 34.672314]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Osaka", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(region == "Poland"){ // 50.81007234316473, 19.116577576411775 54.4633673805736, 17.029505761553008
+                    
+                    var new_point = {"geometry":{"coordinates":[18.599138416553455, 53.014127643296106]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Toruń', "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[17.810643859553394, 51.27565340173556]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Perzów', "POP_MAX": 100000000}}
+                    //places_points.push(new_point); // removed shorts
+
+                    var new_point = {"geometry":{"coordinates":[21.4239,  50.28709]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Mielec', "POP_MAX": 100000000}}
+                    places_points.push(new_point); // 51.27565340173556, 17.810643859553394
+
+                    var new_point = {"geometry":{"coordinates":[21.682752385276896,  49.554733206553195]}, // any pop max its scaled
+                            "properties":{"NAME_EN": 'Dukla', "POP_MAX": 100000000}}
+                    places_points.push(new_point); // 49.554733206553195, 21.682752385276896
+
+                }
 
                 if(region == "Norway"){
                     var new_point = {"geometry":{"coordinates":[6.72036476 , 61.329791]}, // any pop max its scaled
@@ -1267,6 +1678,36 @@
 
                 }
 
+                if(region == "Argentina"){ 
+                    var new_point = {"geometry":{"coordinates":[-67.70946, -53.78769]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Rio Grande", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(region == "Denmark"){ 
+                    var new_point = {"geometry":{"coordinates":[9.473052, 55.495972]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Kolding", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[11.76092, 55.22992]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Næstved", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[8.76966, 55.33051]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Ribe", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[11.788920, 55.444901]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Ringsted", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                    var new_point = {"geometry":{"coordinates":[11.35459, 55.40276]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Slagelse", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
                 if(us_region == "Southwest" && grouped_region){ 
                     var new_point = {"geometry":{"coordinates":[-118.972076, 37.648544]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Mammoth Lakes", "POP_MAX": 100000000}}
@@ -1284,6 +1725,13 @@
                 if(world_region == "South Asia" && grouped_region){ 
                     var new_point = {"geometry":{"coordinates":[73.53966432958072, 4.437813800000001]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Maldives", "POP_MAX": 100000000}}
+                    places_points.push(new_point);
+
+                }
+
+                if(world_region == "The Baltic States" && grouped_region){ 
+                    var new_point = {"geometry":{"coordinates":[25.266872, 57.308613]}, // any pop max its scaled
+                            "properties":{"NAME_EN": "Cēsis", "POP_MAX": 100000000}}
                     places_points.push(new_point);
 
                 }
@@ -1327,7 +1775,7 @@
                 if(region == "Poland"){ // 50.81007234316473, 19.116577576411775 54.4633673805736, 17.029505761553008
                     var new_point = {"geometry":{"coordinates":[19.116577576411775, 50.81007234316473]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Częstochowa", "POP_MAX": 100000000}}
-                    places_points.push(new_point); // 50.01133453601809, 20.98651561367258
+                    //places_points.push(new_point); // removed shorts
 
                     var new_point = {"geometry":{"coordinates":[17.029505761553008, 54.4633673805736]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Słupsk", "POP_MAX": 100000000}}
@@ -1352,6 +1800,12 @@
                 else{
                     place['radius'] = 20;
                 }
+
+                // change Donetstk as it is a dual city
+                if(place['properties']['NAME_EN'] == "Donetsk"){
+                   place['properties']['NAME_EN'] = "Donetsk and Makiivka";
+                }
+
             }
 
             // don't use clippath, makes it slower!!
@@ -1679,14 +2133,56 @@
             .append("rect")
             .attr("class", "maprect")
             .attr("x", function(d){ //
+                if(d.properties.NAME_EN == 'Vancouver'){ // shorts 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 30;
+                }
+                if(d.properties.NAME_EN == 'Victoria'){ // shorts 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 30;
+                }
                 if(d.properties.NAME_EN == 'San Jose'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0];
                 }
-                if(d.properties.NAME_EN == 'Brasília'){ // adjust 
+                if(d.properties.NAME_EN == 'SA Brasília'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - 3*d.bbox.width/4;
+                }
+                if(d.properties.NAME_EN == 'Ponta Delgada'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 40;
                 }
                 if(d.properties.NAME_EN == 'Jakata'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 7;
+                }
+                if(d.properties.NAME_EN == 'Boston'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 10;
+                }
+                if(d.properties.NAME_EN == 'Providence'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 0;
+                }
+                if(d.properties.NAME_EN == 'THRASH São Paulo'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 15;
+                }
+                if(d.properties.NAME_EN == 'Santos'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 15;
+                }
+                if(d.properties.NAME_EN == 'Ho Chi Minh City'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 16;
+                }
+                if(d.properties.NAME_EN == 'Kuala Lumpur'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 12;
+                }
+                if(d.properties.NAME_EN == 'Singapore'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 15;
+                }
+                if(d.properties.NAME_EN == 'Basel'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 7;
+                }
+                if(d.properties.NAME_EN == 'Liestal'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 12;
+                }
+                if(d.properties.NAME_EN == 'The Hague'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 5;
+                }
+                if(d.properties.NAME_EN == 'Rotterdam'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 14;
                 }
                 if(d.properties.NAME_EN == 'Dhaka'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 30;
@@ -1694,11 +2190,14 @@
                 if(d.properties.NAME_EN == 'Bandung'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 9;
                 }
+                if(d.properties.NAME_EN == 'Buenos Aires'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 15;
+                }
                 if(d.properties.NAME_EN == 'Essen'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width;
                 }
                 if(d.properties.NAME_EN == 'Providence'){ // adjust 
-                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 10;
+                    return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 0;
                 }
                 if(d.properties.NAME_EN == 'Düsseldorf'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width;
@@ -1715,7 +2214,7 @@
                 return current_projection(d.geometry.coordinates)[0]  - d['radius'] - (d.bbox.width) - xMargin/2;
             })
             .attr("y", function(d){
-                if(d.properties.NAME_EN == 'Belo Horizonte'){ // adjust 
+                if(d.properties.NAME_EN == 'SA Belo Horizonte'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] + 17;
                 }
                 if(d.properties.NAME_EN == 'Ottawa'){ // adjust 
@@ -1742,8 +2241,17 @@
                 if(d.properties.NAME_EN == 'Cheltenham'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] - 5;
                 }
-                if(d.properties.NAME_EN == 'Bristol'){ // adjust 
+                if(d.properties.NAME_EN == 'DEATH Bristol'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] + 5;
+                }
+                if(d.properties.NAME_EN == 'Santiago'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 5;
+                }
+                if(d.properties.NAME_EN == 'Gothenburg'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 10;
+                }
+                if(d.properties.NAME_EN == 'Borås'){ // adjust 
+                    return current_projection(d.geometry.coordinates)[1] + 10;
                 }
                 if(d.properties.NAME_EN == 'Beirut'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] - 10;
@@ -1754,7 +2262,7 @@
                 if(d.properties.NAME_EN == 'Wollongong'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] + 10;
                 }
-                if(d.properties.NAME_EN == 'Rio de Janeiro'){ // adjust 
+                if(d.properties.NAME_EN == 'SA Rio de Janeiro'){ // adjust 
                     return current_projection(d.geometry.coordinates)[1] - 10;
                 }
                 if(!(d.properties.NAME_EN in anchors)){ // middle default
@@ -1795,14 +2303,56 @@
             .attr("x", d => current_projection(d.geometry.coordinates)[0])
             .attr("y", d => current_projection(d.geometry.coordinates)[1])
             .attr("dx", function(d){
+                if(d.properties.NAME_EN == 'Vancouver'){ // shorts 
+                    return -d.bbox.width/2 + 30;
+                }
+                if(d.properties.NAME_EN == 'Victoria'){ // shorts 
+                    return 30;
+                }
                 if(d.properties.NAME_EN == 'San Jose'){ // adjust 
                     return d.bbox.width/2;
                 }
-                if(d.properties.NAME_EN == 'Brasília'){ // adjust 
+                if(d.properties.NAME_EN == 'SA Brasília'){ // adjust 
                     return -3*d.bbox.width/4; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Ponta Delgada'){ // adjust 
+                    return 40;
                 }
                 if(d.properties.NAME_EN == 'Jakata'){ // adjust 
                     return -d.bbox.width/2 - 7; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Boston'){ // adjust 
+                    return -d.bbox.width/2 + 10; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Providence'){ // adjust 
+                    return 0; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'THRASH São Paulo'){ // adjust 
+                    return -d.bbox.width/2 - 15; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Santos'){ // adjust 
+                    return 15; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Ho Chi Minh City'){ // adjust 
+                    return  16; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Singapore'){ // adjust 
+                    return 15; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Kuala Lumpur'){ // adjust 
+                    return -d.bbox.width/2 - 12; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Basel'){ // adjust 
+                    return -d.bbox.width/2 - 7; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Liestal'){ // adjust 
+                    return  12; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'The Hague'){ // adjust 
+                    return -d.bbox.width/2 - 5; // because there is no top anchor
+                }
+                if(d.properties.NAME_EN == 'Rotterdam'){ // adjust 
+                    return  14; // because there is no top anchor
                 }
                 if(d.properties.NAME_EN == 'Dhaka'){ // adjust 
                     return -d.bbox.width/2 - 30; // because there is no top anchor
@@ -1810,11 +2360,14 @@
                 if(d.properties.NAME_EN == 'Bandung'){ // adjust 
                     return 9; // because there is no top anchor
                 }
+                if(d.properties.NAME_EN == 'Buenos Aires'){ // adjust 
+                    return 15; // because there is no top anchor
+                }
                 if(d.properties.NAME_EN == 'Essen'){ // adjust 
                     return - d.bbox.width;
                 }
                 if(d.properties.NAME_EN == 'Providence'){ // adjust 
-                    return 10;
+                    return 0;
                 }
                 if(d.properties.NAME_EN == 'Düsseldorf'){ // adjust 
                     return - d.bbox.width/2;
@@ -1831,7 +2384,7 @@
                 return -1*d['radius'] - xMargin/2; // end
             })
             .attr("dy", function(d){
-                if(d.properties.NAME_EN == 'Belo Horizonte'){ // adjust 
+                if(d.properties.NAME_EN == 'SA Belo Horizonte'){ // adjust 
                     return 17;
                 }
                 if(d.properties.NAME_EN == 'Ottawa'){ // adjust 
@@ -1858,8 +2411,17 @@
                 if(d.properties.NAME_EN == 'Cheltenham'){ // adjust 
                     return - 5;
                 }
-                if(d.properties.NAME_EN == 'Bristol'){ // adjust 
+                if(d.properties.NAME_EN == 'DEATH Bristol'){ // adjust 
                     return  5;
+                }
+                if(d.properties.NAME_EN == 'Santiago'){ // adjust 
+                    return  5;
+                }
+                if(d.properties.NAME_EN == 'Gothenburg'){ // adjust 
+                    return  10;
+                }
+                if(d.properties.NAME_EN == 'Borås'){ // adjust 
+                    return  10;
                 }
                 if(d.properties.NAME_EN == 'Beirut'){ // adjust 
                     return - 10;
@@ -1870,7 +2432,7 @@
                 if(d.properties.NAME_EN == 'Wollongong'){ // adjust 
                     return  10;
                 }
-                if(d.properties.NAME_EN == 'Rio de Janeiro'){ // adjust 
+                if(d.properties.NAME_EN == 'SA Rio de Janeiro'){ // adjust 
                     return -10;
                 }
                 if(!(d.properties.NAME_EN in anchors)){ // middle default
@@ -1904,7 +2466,10 @@
                 }
                 return "middle";
             })
-            .text(d => d.properties.NAME_EN);
+            .text(function(d){
+                if(d.properties.NAME_EN == "Kiev"){return "Kyiv";}
+                return d.properties.NAME_EN;
+            });
 
 
         /* FORCE SIMULATION */
@@ -1920,7 +2485,8 @@
         image_width = base_image_width - Math.ceil(no_nodes/20)*10; // decrease every 14
         min_image_height = image_width/4;
         max_image_height = image_width/1.4;
-
+        
+        /*
         var node = svg.append("g").selectAll("images")
         .data(nodes, d => d.id)
         .enter().append('image')
@@ -1964,10 +2530,10 @@
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended));
-
+        */
         
         //** Simulation settings  // alphadecay 0.0028  velocitydecay 0.4
-        simulation = d3.forceSimulation(nodes).velocityDecay(0.5)//.alphaMin(0.5)//.alphaDecay(0.01)//.velocityDecay(0.4)//.alpha(0.1)..velocityDecay(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
+        simulation = d3.forceSimulation(nodes).velocityDecay(0.5).alphaDecay(0.005)//.alphaMin(0.5)//.alphaDecay(0.01)//.velocityDecay(0.4)//.alpha(0.1)..velocityDecay(0.5)//.alphaDecay(0.1)//.velocityDecay(0.8)//.alpha(0.5).alphaDecay(0.1).velocityDecay(0.8)
             .force("link", d3.forceLink(links).id(d => d.id).strength(0.1))
             .force("collide", d3.forceCollide().radius(function(d){
                 if(d['nodeType'] == 'band'){
@@ -2035,12 +2601,17 @@
             .attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
             .attr("x2", function(d){ // update target point to account for width/height
-                return d.target.x + d.target.width/2;
+                var image_tag = document.getElementById('bandLogo');
+                var image_box = image_tag.getBoundingClientRect();
+                return image_box.x + image_box.width/2 - 150;
             })
             .attr("y2", function(d){
-                return d.target.y + d.target.height/2;
+                var image_tag = document.getElementById('bandLogo');
+                var image_box = image_tag.getBoundingClientRect();
+                return image_box.y + image_box.height/2 + 60;
             });
-    
+            
+            /*
             node
             .attr("x", function(d){
                 return d.x;
@@ -2048,6 +2619,7 @@
             .attr("y", function(d){
                 return d.y;
             });
+            */
 
             
             base_node
@@ -2061,6 +2633,7 @@
         update_chart = function(){
             //console.log(nodes);
             //console.log(links);
+            changes = true;
 
             // set transition for remove but no add
             var trans_time = 4000;
@@ -2089,11 +2662,13 @@
             //* base node
 
             // update existing nodes..HERE transition without data
+            /*
             if(changes){
                 base_node.data(nodes, d => d.id)
                 .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
                 .transition().duration(3000).style("opacity", 1);
             }
+            */
 
             // give back data
             base_node = base_node.data(nodes, d => d.id);
@@ -2204,115 +2779,24 @@
                     else{return 8;}
 
                 }).merge(base_node);
-            
-            
-            //** image nodes
-
-            // update existing nodes
-            
-            if(changes){
-
-                // transition
-                node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
-                .transition().duration(3000).style("opacity", 1);
-
-                // resize
-                node.data(nodes, d => d.id)
-                .attr("width", function(d){
-
-                    if(d.nodeType=="base"){
-                        d['width'] = 0;
-                        d['height'] = 0;
-                        return 0;}
-
-                    // set from image wwidth and adjust
-                    var image_height = (image_width/d.image_size[0]) * d.image_size[1];
-                    var node_width = image_width;
-                    if(image_height < min_image_height){
-                        node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
-                        if(node_width>(1.5*image_width)){ // cap width
-                            node_width = 1.5*image_width;
-                        }
-
-                    }
-                    else if(image_height > max_image_height){
-                       node_width = (max_image_height/d.image_size[1]) * d.image_size[0];
-                    }
-
-                    d['width'] = node_width;
-                    d['height'] = (node_width/d.image_size[0]) * d.image_size[1];
-                    return node_width;
-                });
-                
-            }
-            
-
-            // then give data
-            node = node.data(nodes, d => d.id);
-            
-            // exit nodes
-            node.exit()
-            .transition().duration(3000).style("opacity", 0).remove();
-            
-            // enter new nodes
-            node = node
-                .enter().append("image")
-                .attr("class", "nodes")
-                .attr("xlink:href", function(d){
-                    if(d['genre'] == 'made' || d['genre'] == 'modified'){ // made logo
-                        return "logos_transparent/" + d['genre'] + "/" + d.logo;
-                    }
-                    else{
-                        return "logos_transparent/" + d['genre'] + "/"+ d['local_region'] + "/" + d.logo;
-                    }
-
-                })
-                .attr("width", function(d){
-
-                    if(d.nodeType=="base"){
-                        d['width'] = 0;
-                        d['height'] = 0;
-                        return 0;}
-
-                    // set from image wwidth and adjust
-                    var image_height = (image_width/d.image_size[0]) * d.image_size[1];
-                    var node_width = image_width;
-                    if(image_height < min_image_height){
-                        node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
-                        if(node_width>(1.5*image_width)){ // cap width
-                            node_width = 1.5*image_width;
-                        }
-
-                    }
-                    else if(image_height > max_image_height){
-                        node_width = (max_image_height/d.image_size[1]) * d.image_size[0]; 
-                    }
-
-                    d['width'] = node_width;
-                    d['height'] = (node_width/d.image_size[0]) * d.image_size[1];
-                    return node_width;
-                })
-                .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended)).merge(node);
 
             //**  links
-
+            
+            /*
             // update existing
             if(changes){
                 link.data(links, function(d) { return d.source.id + "-" + d.target.id; })
                 .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
                 .transition().duration(3000).style("opacity", 1);
             }
+            */
             
             // then give back data
             link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
 
             // exit links
             link.exit()
-            .transition().duration(3000).style("opacity", 0).remove();
+            .transition().duration(0).style("opacity", 0).remove();
             
             // enter new links
             link = link
@@ -2323,11 +2807,12 @@
                     return baseColour;
                 })
                 .attr("stroke-width", 1)
-                .attr("stroke-opacity", 0.3)
+                .attr("stroke-opacity", 0.8)
                 .merge(link);
-        
-                if(changes){
-                    simulation.velocityDecay(0.5)
+            
+            
+            if(changes){
+                    simulation.velocityDecay(0.5).alphaDecay(0.005)
                         .force("link", d3.forceLink(links).id(d => d.id).strength(0.1))
                         .force("collide", d3.forceCollide().radius(function(d){
                         if(d['nodeType'] == 'band'){
@@ -2343,12 +2828,13 @@
                             return 20;
                         }
                     }).strength(0.5));
-
-                    // regen sim
-                    simulation.nodes(nodes);
-                    simulation.alpha(1).restart().tick();
-                    ticked(); // render now!
                 }
+            
+                // regen sim
+                simulation.nodes(nodes);
+                simulation.alpha(0.9).restart().tick();
+                
+                //ticked(); // render now!
                 
         }
 

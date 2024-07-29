@@ -32,7 +32,7 @@ a {
 
 #controls{
   position:absolute;
-  top:50px; /* canada australia 20px*/
+  top:50px; /* australia 20px hungary 33opx*/
   right:130px; /*malaysia 430px, rest 130px*/
   width:220px;
   letter-spacing: 4px;
@@ -56,15 +56,13 @@ a {
   letter-spacing:4px;
   font-family: 'Impact', sans-serif;
   color:transparent;
-  
-
 }
 
 #genreContainer{
   position:absolute;
   top:380px;/* top 50px bottom 380px canada 410px australia 430px*/
   left:130px; 
-  width:200px;
+  width:200px;/* DONT FORGET put back band jsons for thrash and death*/
   opacity:1;
   background-color: rgba(0,0,0,0);
 
@@ -85,7 +83,6 @@ a {
   color:transparent;
   font-size:45px;
   font-weight: 700;
-  
 }
 
 
@@ -105,8 +102,8 @@ a {
 
 .from{
   font-family: "Luckiest Guy", cursive;
-  color:white;
+  color:whitesmoke;
   font-size: 50px;
+  letter-spacing: 8px;
+  display:none;
 }
-
-
