@@ -38,6 +38,7 @@ a {
   letter-spacing: 4px;
   color:"black";
   background-color: rgba(0,0,0,0);
+  /*display:none;ADDED for thumbs*/
 }
 
 #yearDisplay{
@@ -65,6 +66,8 @@ a {
   width:220px; /* DONT FORGET put back band jsons for thrash and death*/
   opacity:1;
   background-color: rgba(0,0,0,0);
+  /*display:inline-block;  ADDED for thumbs */
+  /*width: 100%;  ADDED for thumbs */
 
 }
 
@@ -107,7 +110,7 @@ a {
   width:200px;
   letter-spacing: 4px;
   font-size: 40px;
-  color: gold;
+  color: springgreen;
   text-shadow: 2px 2px gray;
 }
 
@@ -123,14 +126,15 @@ a {
   color:whitesmoke;
 }
 
-path{
-  opacity: 0.5;
-}
-
-text{
-  opacity: 0.7;
-}
 
 svg{
+  opacity: 0.9; /*shorts = 0.9*/
+}
+
+img{
+  margin:0px; /* thumbs = 2px*/
+}
+
+path{
   opacity: 0.9;
 }

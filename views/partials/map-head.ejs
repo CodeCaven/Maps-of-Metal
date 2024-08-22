@@ -1355,6 +1355,7 @@
             
            
             // source is base
+            /*
             link
             .attr("x1", d => d.source.x)
             .attr("y1", d => d.source.y)
@@ -1372,6 +1373,7 @@
             .attr("y", function(d){
                 return d.y;
             });
+            */
 
             
             base_node
@@ -1495,9 +1497,7 @@
                         }
                         
                     }
-                    if(!(in_view)){
-                        return "url(#specularwhitesmoke)";
-                    }
+                    
                     return "url(#specular" + baseColour + ")"
                     
                 })
@@ -1533,147 +1533,14 @@
             //** image nodes
 
             // update existing nodes
-            
-            if(changes){
-
-                // transition
-                node.data(nodes, d => d.id)
-                .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
-                .transition().duration(3000).style("opacity", 1);
-
-                // resize
-                node.data(nodes, d => d.id)
-                .attr("width", function(d){
-
-                    if(d.nodeType=="base"){
-                        d['width'] = 0;
-                        d['height'] = 0;
-                        return 0;}
-
-                    // set from image wwidth and adjust
-                    var image_height = (image_width/d.image_size[0]) * d.image_size[1];
-                    var node_width = image_width;
-                    if(image_height < min_image_height){
-                        node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
-                        if(node_width>(1.5*image_width)){ // cap width
-                            node_width = 1.5*image_width;
-                        }
-
-                    }
-                    else if(image_height > max_image_height){
-                       node_width = (max_image_height/d.image_size[1]) * d.image_size[0];
-                    }
-
-                    d['width'] = node_width;
-                    d['height'] = (node_width/d.image_size[0]) * d.image_size[1];
-                    return node_width;
-                });
-                
-            }
-            
-
-            // then give data
-            node = node.data(nodes, d => d.id);
-            
-            // exit nodes
-            node.exit()
-            .transition().duration(3000).style("opacity", 0).remove();
-            
-            // enter new nodes
-            node = node
-                .enter().append("image")
-                .attr("class", "nodes")
-                .attr("xlink:href", function(d){
-                    if(d['genre'] == 'made' || d['genre'] == 'modified'){ // made logo
-                        return "logos_transparent/" + d['genre'] + "/" + d.logo;
-                    }
-                    else{
-                        return "logos_transparent/" + d['genre'] + "/"+ d['local_region'] + "/" + d.logo;
-                    }
-
-                })
-                .style("opacity", 0)
-                .attr("width", function(d){
-
-                    if(d.nodeType=="base"){
-                        d['width'] = 0;
-                        d['height'] = 0;
-                        return 0;}
-
-                    // set from image wwidth and adjust
-                    var image_height = (image_width/d.image_size[0]) * d.image_size[1];
-                    var node_width = image_width;
-                    if(image_height < min_image_height){
-                        node_width = (min_image_height/d.image_size[1]) * d.image_size[0];
-                        if(node_width>(1.5*image_width)){ // cap width
-                            node_width = 1.5*image_width;
-                        }
-
-                    }
-                    else if(image_height > max_image_height){
-                        node_width = (max_image_height/d.image_size[1]) * d.image_size[0]; 
-                    }
-
-                    d['width'] = node_width;
-                    d['height'] = (node_width/d.image_size[0]) * d.image_size[1];
-                    return node_width;
-                })
-                .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended)).merge(node);
 
             //**  links
-
-            // update existing
-            if(changes){
-                link.data(links, function(d) { return d.source.id + "-" + d.target.id; })
-                .style("opacity", 0).transition().duration(trans_time).style("opacity", 0)
-                .transition().duration(3000).style("opacity", 1);
-            }
-            
-            // then give back data
-            link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
-
-            // exit links
-            link.exit()
-            .transition().duration(3000).style("opacity", 0).remove();
-            
-            // enter new links
-            link = link
-                .enter()
-                .append("line")
-                .attr("class", "links")
-                .attr("stroke", function(d){
-                    return baseColour;
-                })
-                .attr("stroke-width", 0)
-                .attr("stroke-opacity", 0)
-                .merge(link);
-        
-                if(changes){
-                    simulation.velocityDecay(0.5)
-                        .force("link", d3.forceLink(links).id(d => d.id).strength(0.1))
-                        .force("collide", d3.forceCollide().radius(function(d){
-                        if(d['nodeType'] == 'band'){
-                            
-                            if(d.width >= d.height){
-                                return d.width/2 + 5;
-                            }
-                            else{
-                                return d.height/2 + 5;
-                            }
-                        }
-                        else{
-                            return 19;
-                        }
-                    }).strength(0.4));
 
                     // regen sim
                     //simulation.nodes(nodes);
                     //simulation.alpha(1).restart().tick();
                     //ticked(); // render now!
-                }
+                
                 
         }
 

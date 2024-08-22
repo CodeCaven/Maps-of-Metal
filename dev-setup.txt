@@ -1,0 +1,7 @@
+- VIEWS: index-long, index-shorts, and index-thumbs exist (CHANGE to index.ejs for use)
+- PARTIALS: index-head-shorts, index-head-long and index-head-thumbs exist (CHANGE to index-head.ejs for use)
+
+- To create the background maps, use map-head by changing the linked file name in index.ejs. 
+	Use the long form file versions.
+
+- There are 2 css stylesheets that get linked to from index-head. Make sure to modify the correct one.

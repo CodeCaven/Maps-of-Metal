@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <% include ./partials/map-head %>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        
+        <div class="col-12"><div id="plot_div"></div></div>
+        <!--genre header-->
+        <div id="genreContainer">
+          <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+          <div id="genreContainerheader" class="genreContainerheader" data-mdb-toggle="collapse" data-mdb-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">
+            <hr class="regionHR">
+            <h1 id="genreHeader" class="text-center">Thrash Metal</h1>
+            <hr class="regionHR">
+          </div>
+        </div>
+         <!--region header-->
+         <div id="regionContainer">
+          <hr class="regionHR">
+          <!--<h4 id="regionDisplay" class="text-center"></h4>-->
+          <hr class="regionHR">
+        </div>
+          <!-- Draggable controls-->
+        <div id="controls">
+          <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
+          <div id="controlsheader" class="controlsheader" data-mdb-toggle="collapse" data-mdb-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">
+              
+              <hr class="regionHR">
+              <div class="from text-center">Since</div>
+              <div id="yearDisplay" class="text-center"></div>
+              <div class="from text-center">in</div>
+              <h4 id="regionDisplay" class="text-center"></h4>
+              <hr class="regionHR">
+              
+              <div id="yearControl" class="btn-group" role="group" aria-label="Basic example" style="display:flex">
+                <button id="left" type="button" class="btn btn-dark"><<</button>
+                <button id="right" type="button" class="btn btn-dark">>></button>
+              </div>
+              <br>
+        </div>
+       </div>
+
+       <div class="banner" style="display:none;">Zombie Attack!</div>
+       
+      </div>
+    </div>
+    <!--bootstrap javascript-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>

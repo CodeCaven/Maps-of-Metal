@@ -44,10 +44,10 @@ let thrash_views =
 "Greece": {"cities": ['Thessaloniki',
 'Athens',
 'Heraklion',
-"Volos",
+//"Volos",// removed shorts
 'Patras',
-"Chania",
-'Larissa',
+//"Chania",// removed shorts
+//'Larissa',// removed shorts
 'Ioannina',
 'Serres']},
 "Portugal": {"cities": ['Lisbon',
@@ -67,7 +67,7 @@ let thrash_views =
 'Évora',
 'Guimarães']},
 "Netherlands": {"cities": [
-'Utrecht',
+//'Utrecht',// removed shorts
 "Zwolle",
 'Sneek',
 'Winterswijk',
@@ -156,10 +156,10 @@ let thrash_views =
 'Frankfurt',
 'Hamburg',
 'Dusseldorf',
-'Stuttgart',
+//'Stuttgart',// removed shorts
 'Berlin',
 'Leipzig',
-'Hanover',
+//'Hanover',// removed shorts
 'Münster',
 'Gelsenkirchen']},
 "Italy":{"cities": ['Milan',
@@ -168,8 +168,8 @@ let thrash_views =
 'Bari',
 'Turin',
 "Lecce",
-'Bologna',
-'Palermo',
+//'Bologna',// removed shorts
+//'Palermo',// removed shorts
 'Cagliari',
 'Venice',
 'Padua',
@@ -216,7 +216,7 @@ let thrash_views =
 'Pamplona',
 'Bilbao',
 "Algeciras",
-"Salamanca",
+//"Salamanca",// removed shorts
 'Palma',
 'Valencia',
 "Murcia",
@@ -299,11 +299,11 @@ let black_views =
 'Szerencs',
 'Szombathely',
 'Ózd',
+//'Veszprém',// removed shorts
 'Nagykanizsa',
 'Zalaegerszeg',
 'Nagyatád',
-'Szentendre',
-'Veszprém']},
+'Szentendre']},
 "Eastern Europe": {"cities": ['Lviv',
 'Chișinău',
 'Kharkiv',
@@ -457,8 +457,8 @@ let black_views =
 'Turin',
 "Bolzano",
 "Taranto",
-'Palermo',
-'Bologna',
+//'Palermo',//removed shorts
+//'Bologna',// removed shorts
 'Catania',
 'Rome',
 'Cagliari',
@@ -481,7 +481,7 @@ let black_views =
 'Lyon',
 'Nice',
 'Toulouse',
-'Poitiers',
+//'Poitiers',//removed shorts
 'Bordeaux',
 'Merléac','Bagnols-sur-Cèze',
 'Grenoble',
@@ -517,13 +517,14 @@ let black_views =
 'Martignas-sur-Jalle',
 'Dagneux',
 'Yutz']},
-"Finland":{"cities": ['Kouvola',
+"Finland":{"cities": [
+//'Kouvola',//removed shorts
 'Helsinki',
 'Lahti',
-'Jyväskylä',
+//'Jyväskylä',//removed shorts
 'Hyvinkää',
 'Ylöjärvi',
-'Kuopio',
+//'Kuopio',//removed shorts
 'Rovaniemi',
 'Hämeenlinna',
 'Oulu',
@@ -609,11 +610,11 @@ let death_views =
 'Saguenay',
 'Toronto']},
 "Argentina" : {"cities":[
-"Córdoba",
+//"Córdoba",// removed shorts
 "Rio Grande",
 'Bahía Blanca',
 'Salta',
-'Neuquén',
+//'Neuquén',// removed shorts
 'San Miguel']},
 "Denmark" : {"cities":['Aalborg',
 'Copenhagen',

@@ -61,14 +61,14 @@
         let simulation;
         let us_region = ""; // see death_data 4 midwest international bands when SHORTS
         let world_region = ""; 
-        let region = "Brazil"; // "United States of America" "United Kingdom"
+        let region = "Netherlands"; // "United States of America" "United Kingdom"
         let display_region = "World"; // World
         let grouped_region = false;
         let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
         let current_year = 1980;
-        let cap = 85; // southeast asia death 77,greece 77 south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
+        let cap = 80; // southeast asia death 77,greece 77 south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
         let prev_year;
         let nodes = [];
         let links = [];
@@ -239,7 +239,7 @@
            lookup = create_lookup(display_bands_list);
 
            // filter bands here Trono, Tsala
-           var omit_bands = ["Trono", "Tsalal", "Kat", "Vestígio"];
+           var omit_bands = ["Orv","Towards Rusted Soil","Battle Gargoyle","WSR", "Trono", "Tsalal", "Kat", "Vestígio", "NordVinter", "Kryatjurr of Desert Ahd"];
            display_bands_list = display_bands_list.filter(band => !omit_bands.includes(band.name));
         
            // sort bands list (local or world) ['active_years'][0]
@@ -366,11 +366,11 @@
                 document.getElementById("nameDisplay").style.fontSize = "1rem";
 
                 // set height and width (stretch option)
-                var stretch_bands = ["Cattle Decapitation", "Nithing"];
+                var stretch_bands = ["Cattle Decapitation", "Nithing", "N.A.O.P."];
                 if(stretch_bands.includes(band['name'])){
                     document.getElementById("genreContainerheader").style.width =  "172px";
                     document.getElementById("genreContainer").style.left = (middle - 172/2 - 12) + "px";
-                    band_image_tag.setAttribute("height", max_image_height);
+                    band_image_tag.setAttribute("height",max_image_height); // max_image_height
                     band_image_tag.setAttribute("width", 172);
                 }
                 
@@ -388,7 +388,11 @@
 
             // band name
             var band_name_tag = document.getElementById('nameDisplay');
-            band_name_tag.innerHTML = band['name'];
+            var band_name = band['name'];
+            if(band_name == "Fuck Off"){band_name = "F**k Off";}
+            if(band_name == "Social Shit"){band_name = "Social S**t";}
+            if(band_name == "Deathfucker"){band_name = "Deathf**ker";}
+            band_name_tag.innerHTML = band_name;
             
             // year started
             var band_year_tag = document.getElementById('yearDisplay');
@@ -444,7 +448,6 @@
 
             links = []; // reset           
             if(!(channel)){
-                
                 nodes.push(new_base_node);
                 nodes.push(new_band_node);
                 links.push(new_link);
@@ -495,7 +498,7 @@
 
             // next band
             bi += 1;
-            if(bi >= cap - 1){return;}
+            if(bi >= cap + 2){return;}
             display_shorts_band();
 
 
@@ -995,7 +998,7 @@
             //document.getElementById("regionDisplay").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
             document.getElementById("regionDisplay").style.webkitTextStroke  = "1px " + "whitesmoke";
             //document.getElementById("regionDisplay").style.textShadow  = "2px 2px 5px " + mapColour;
-            //document.getElementById("genreHeader").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
+            //document.getElementById("regionDisplay").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
             //document.getElementById("genreHeader").style.color = baseColour;
             //document.getElementById("genreHeader").style.webkitTextStroke  = "1px " + "whitesmoke";
             document.getElementById("genreHeader").style.textShadow  = "2px 2px 0px " + mapColour;
@@ -1013,7 +1016,7 @@
 
             let textScale = d3.scaleLinear()
             .domain([100000, 5000000])
-            .range([0.7, 0.7]).clamp(true);
+            .range([0.7, 0.7]).clamp(true);// 0.7,0.7
 
             let imageScale = d3.scaleLinear()// using image range at the moment
             .domain([1, 200])// number of nodes
@@ -1056,9 +1059,9 @@
 
                     // background us
                     var us_counties_background = us_counties.features.filter(prop => prop.properties.STATE != us_state_data[region]["fips_code"]);
-                    us_counties_background = us_counties_background.filter(prop => neighbours[region].includes(get_name_from_fips(prop.properties.STATE)));
+                    //us_counties_background = us_counties_background.filter(prop => neighbours[region].includes(get_name_from_fips(prop.properties.STATE)));
                     var us_boundaries_background = us_states.features.filter(prop => prop.properties.NAME != region);
-                    us_boundaries_background = us_boundaries_background.filter(prop => neighbours[region].includes(prop.properties.NAME));
+                    //us_boundaries_background = us_boundaries_background.filter(prop => neighbours[region].includes(prop.properties.NAME));
                 }
 
                 // by region Northeast etc
@@ -1118,7 +1121,7 @@
 
                     // background map (states)
                     var world_states_background = world_states_back.features.filter(prop => prop.properties.admin != "United States of America" && prop.properties.admin != "Canada" && prop.properties.admin != "Antarctica");
-                    world_states_background = world_states_background.filter(prop => neighbours[region].includes(prop.properties.admin));
+                    //world_states_background = world_states_background.filter(prop => neighbours[region].includes(prop.properties.admin));
                     world_states_background = world_states_background.filter(prop => prop.properties.admin != region);
 
                     // filter russia oblasks ???
@@ -1140,7 +1143,7 @@
 
                     // background map (boundary)
                     var world_boundaries_background = world_boundaries_back.features.filter(prop => prop.properties.ADMIN != "United States of America" && prop.properties.ADMIN != "Canada" && prop.properties.ADMIN != "Antarctica");
-                    world_boundaries_background = world_boundaries_background.filter(prop => neighbours[region].includes(prop.properties.ADMIN));
+                    //world_boundaries_background = world_boundaries_background.filter(prop => neighbours[region].includes(prop.properties.ADMIN));
                     world_boundaries_background = world_boundaries_background.filter(prop => prop.properties.ADMIN != region);
 
                     // background us
@@ -1374,11 +1377,11 @@
 
                     var new_point = {"geometry":{"coordinates":[13.45293,43.29789]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Macerata", "POP_MAX": 100000000}}
-                    places_points.push(new_point);
+                    //places_points.push(new_point); // removed shorts
 
                     var new_point = {"geometry":{"coordinates":[13.583333,37.316666]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Agrigento", "POP_MAX": 100000000}}
-                    places_points.push(new_point);
+                    //places_points.push(new_point); // removed shorts
 
                 }
 
@@ -1423,7 +1426,7 @@
 
                     var new_point = {"geometry":{"coordinates":[6.7194, 51.9725 ]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Winterswijk", "POP_MAX": 100000000}}
-                    places_points.push(new_point);
+                    //places_points.push(new_point);// removed shorts
 
                     var new_point = {"geometry":{"coordinates":[6.89583, 52.21833 ]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Enschede", "POP_MAX": 100000000}}
@@ -1494,7 +1497,7 @@
 
                     var new_point = {"geometry":{"coordinates":[12.568333, 44.0594448]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Rimini", "POP_MAX": 100000000}}
-                    places_points.push(new_point);
+                    //places_points.push(new_point);// removed shorts
 
                 }
 
@@ -1649,7 +1652,7 @@
                 if(region == "Norway"){
                     var new_point = {"geometry":{"coordinates":[6.72036476 , 61.329791]}, // any pop max its scaled
                             "properties":{"NAME_EN": "Sogndal", "POP_MAX": 100000000}}
-                    places_points.push(new_point);
+                    //places_points.push(new_point);// removed shorts
 
                     // 'latitude': 59.7985899, 'longitude': 6.294994955666921 59.284073, 11.109403
                     var new_point = {"geometry":{"coordinates":[6.294994955666921 , 59.7985899]}, // any pop max its scaled
@@ -2166,7 +2169,7 @@
                 if(d.properties.NAME_EN == 'Ho Chi Minh City'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 + 16;
                 }
-                if(d.properties.NAME_EN == 'Kuala Lumpur'){ // adjust 
+                if(d.properties.NAME_EN == 'LONG Kuala Lumpur'){ // adjust 
                     return current_projection(d.geometry.coordinates)[0] - d.bbox.width/2 - 12;
                 }
                 if(d.properties.NAME_EN == 'Singapore'){ // adjust 
@@ -2288,7 +2291,7 @@
             .attr("rx", 4)
             .attr("stroke", "grey")
             .attr("stroke-width", 1)
-            .style("fill-opacity", 0.8)
+            .style("fill-opacity", 1)
             .style("stroke-opacity", 0.8)
             .attr('transform', function(d) {
                 return `translate(-${xMargin}, -${d.bbox.height * 0.8 + yMargin})`
@@ -2339,7 +2342,7 @@
                 if(d.properties.NAME_EN == 'Singapore'){ // adjust 
                     return 15; // because there is no top anchor
                 }
-                if(d.properties.NAME_EN == 'Kuala Lumpur'){ // adjust 
+                if(d.properties.NAME_EN == 'LONG Kuala Lumpur'){ // adjust 
                     return -d.bbox.width/2 - 12; // because there is no top anchor
                 }
                 if(d.properties.NAME_EN == 'Basel'){ // adjust 
@@ -2603,12 +2606,12 @@
             .attr("x2", function(d){ // update target point to account for width/height
                 var image_tag = document.getElementById('bandLogo');
                 var image_box = image_tag.getBoundingClientRect();
-                return image_box.x + image_box.width/2 - 150;
+                return image_box.x + image_box.width/2 - 140;
             })
             .attr("y2", function(d){
                 var image_tag = document.getElementById('bandLogo');
                 var image_box = image_tag.getBoundingClientRect();
-                return image_box.y + image_box.height/2 + 60;
+                return image_box.y + image_box.height/2 + 30;
             });
             
             /*
@@ -2675,7 +2678,7 @@
 
             // exit nodes
             base_node.exit()
-            .transition().duration(3000).style("opacity", 0).remove();
+            .transition().duration(0).style("opacity", 0).remove();
 
             // enter new nodes (diff based on whether in view or not)
             base_node = base_node
