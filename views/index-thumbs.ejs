@@ -8,7 +8,7 @@
         <div class="col-12"><div id="plot_div"></div></div>
         <!--genre header-->
         <div id="genreContainer">
-          
+          <h1 id="genreHeader" class="text-center" style="display:none">Thrash Metal</h1>
         </div>
         
          <!--region header-->
@@ -21,12 +21,13 @@
         <div id="controls">
           <!-- Include a header DIV with the same name as the draggable DIV, followed by "header" -->
           <div id="controlsheader" class="controlsheader" data-mdb-toggle="collapse" data-mdb-target="#collapseDiv" aria-expanded="false" aria-controls="collapseDiv">
+              <hr class="regionHR">
+              <div class="from text-center">Since</div>
+              <div id="yearDisplay" class="text-center"></div>
               
-              <!--<div id="yearDisplay" class="text-center"></div>-->
-              <h1 id="genreHeader" class="text-center">Thrash Metal</h1>
               <div class="from text-center">in</div>
               <h4 id="regionDisplay" class="text-center"></h4>
-              
+              <hr class="regionHR">
               <div id="yearControl" class="btn-group" role="group" aria-label="Basic example" style="display:none">
                 <button id="left" type="button" class="btn btn-dark"><<</button>
                 <button id="right" type="button" class="btn btn-dark">>></button>

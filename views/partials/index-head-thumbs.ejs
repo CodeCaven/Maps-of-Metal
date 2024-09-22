@@ -31,6 +31,7 @@
         let black_bands = JSON.parse(<%-JSON.stringify(ejs_black_bands)%>);
         let death_bands = JSON.parse(<%-JSON.stringify(ejs_death_bands)%>);
         let power_bands = JSON.parse(<%-JSON.stringify(ejs_power_bands)%>);
+        let heavy_bands = JSON.parse(<%-JSON.stringify(ejs_heavy_bands)%>);
         let speed_bands = JSON.parse(<%-JSON.stringify(ejs_speed_bands)%>);
         let world_places = JSON.parse(<%-JSON.stringify(ejs_places)%>);
         let world_states = JSON.parse(<%-JSON.stringify(ejs_states)%>);
@@ -61,23 +62,23 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = "Southwest"; // see death_data 4 midwest international bands when SHORTS
+        let us_region = ""; // see death_data 4 midwest international bands when SHORTS
         let world_region = ""; 
-        let region = "Colombia"; // "United States of America" "United Kingdom"
-        let display_region = "World"; // World
+        let region = "California"; // "California" "United Kingdom"
+        let display_region = "US"; // World US
         let grouped_region = false;
         let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
         let current_year = 1980;
-        let cap = 85; // southeast asia death 77,greece 77 south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
+        let cap = 120; // southeast asia death 77,greece 77 south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
         let prev_year;
         let nodes = [];
         let links = [];
         let display_bands_list = [];
         let lookup = {};
-        let display_bands = {"thrash":false, "black":false, "death":false, "power":false, "speed":false};
-        let display_genre = "black";
+        let display_bands = {"heavy":false,"thrash":false, "black":false, "death":false, "power":false, "speed":false};
+        let display_genre = "heavy";
         let changes = false;
         let changes_add = false;
         let changes_remove = false;
@@ -130,6 +131,7 @@
            console.log(black_bands);
            console.log(death_bands);
            console.log(power_bands);
+           console.log(heavy_bands);
            console.log(speed_bands);
            console.log(world_places);
            console.log(world_states);
@@ -225,6 +227,9 @@
            else if(display_bands["speed"]){
             views = power_views;
             genre_display.innerHTML = "speed Metal"}
+           else if(display_bands["heavy"]){
+            views = heavy_views;
+            genre_display.innerHTML = "heavy Metal"}
            else{
             views = black_views;
             genre_display.innerHTML = "Black Metal"}
@@ -244,8 +249,11 @@
            var omit_bands = ["Ash Pool","Funereal Presence", "One Master", "Acid Age", "Orv","Towards Rusted Soil","Battle Gargoyle","WSR", "Trono", "Tsalal", "Kat", "Vestígio", "NordVinter",
                                "Dark Fortress","Thron", "Lantlôs","Darkened Nocturn Slaughtercult", "Tha-Norr",  "Verdunkeln","Temple of Abraxas", "Uamh", "Mania", "Seke Nipahem","Ash", "Orgy of Carrion", "Kryatjurr of Desert Ahd",
                                 "Lorn","Vowels","Nott","Iperyt"];
-           var omit_wall_bands = ["Kat", "Battle Gargoyle","WSR","Orv","Towards Rusted Soil"];
+           var omit_wall_bands = ["Metallica","Megadeth", "JRS","Cracked Vessel", "Kat", "Battle Gargoyle","WSR","Orv","Towards Rusted Soil","Kryatjurr of Desert Ahd"];
            display_bands_list = display_bands_list.filter(band => !omit_wall_bands.includes(band.name));
+
+           // filter ouut made logos (NOTE: they don't have image size for heavy)
+           display_bands_list = display_bands_list.filter(band => band.genre != "made");
         
            // sort bands list (local or world) ['active_years'][0]
            display_bands_list.sort(function(a, b) { 
@@ -293,6 +301,18 @@
                 var logo_path = "/logos_transparent/" + band['genre'] + 
                 "/"+ band['local_region'] + "/" + band['logo'];
 
+                // handle old modified images
+                if(band['genre'] == "modified"){
+                    var logo_path = "/logos_transparent/" + band['genre'] + "/" + band['logo'];
+
+                }
+
+                // check band names
+                if(i == 62){
+                    console.log(band['name']);
+                    console.log(logo_path);
+                }
+
                 // create image tag
                 var band_image_tag = document.createElement('img');
                 band_image_tag.style.display = "inline";
@@ -308,9 +328,14 @@
                     band_image_tag.setAttribute("height", 100);
                     band_image_tag.setAttribute("src", logo_path);
 
-                }
+                }// 
                 else if(band['name'] == 'Black Murder'){ // tall bands
                     band_image_tag.setAttribute("height", 100);
+                    band_image_tag.setAttribute("src", logo_path);
+
+                }
+                else if(band['name'] == '原罪'){ // tall bands
+                    band_image_tag.setAttribute("height", 60);
                     band_image_tag.setAttribute("src", logo_path);
 
                 }
@@ -333,6 +358,71 @@
                     band_image_tag.setAttribute("height", 70);
                     band_image_tag.setAttribute("src", logo_path);
 
+                }
+                else if(band['name'] == 'Heathen Deity'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+
+                }
+                else if(band['name'] == 'Rosaceae'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+
+                }// 
+                else if(band['name'] == 'The Unsane'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "21px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "21px";
+                }
+                else if(band['name'] == 'Lo-Ruhamah'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "20px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "20px";
+
+                }
+                else if(band['name'] == 'Skeleton of God'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "14px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "14px";
+                }
+                else if(band['name'] == 'Cirith Ungol'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "14px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "14px";
+                }
+                else if(band['name'] == 'Faceless and Descending'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "14px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "14px";
+                }
+                else if(band['name'] == 'Sleep White Winter'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "14px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "14px";
+                }// 
+                else if(band['name'] == 'X-Cops'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "14px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "14px";
+                }
+                else if(band['name'] == 'Łatanu'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "14px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "14px";
+                }
+                else if(band['name'] == 'Thorium'){ // tall bands
+                    band_image_tag.setAttribute("height", 55);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "14px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "14px";
                 }
                 else{ //
                     band_image_tag.setAttribute("width", image_width);
@@ -626,6 +716,10 @@
                 create_graph(current_projection, lookup, display_bands_list, "power");
             }
 
+            if(display_bands["heavy"]){
+                create_graph(current_projection, lookup, display_bands_list, "heavy");
+            }
+
             if(display_bands["speed"]){
                 create_graph(current_projection, lookup, display_bands_list, "speed");
             }
@@ -647,6 +741,10 @@
 
             if(display_bands["power"]){
                 update_graph(current_projection, lookup, display_bands_list, "power");
+            }
+
+            if(display_bands["heavy"]){
+                update_graph(current_projection, lookup, display_bands_list, "heavy");
             }
 
             if(display_bands["speed"]){
@@ -733,6 +831,9 @@
             else if(display_genre == "power"){
                 var search_bands = power_bands;
             }
+            else if(display_genre == "heavy"){
+                var search_bands = heavy_bands;
+            }
             else if(display_genre == "speed"){
                 var search_bands = speed_bands;
             }
@@ -763,7 +864,7 @@
          // create the lookup data structure
          function create_lookup(bands_list){
             var lookup = {};
-            for(let i = 1970; i <= 2025; i++){
+            for(let i = 1963; i <= 2025; i++){
                 lookup[i] = [];
             }
             for(let band of bands_list){
@@ -1065,7 +1166,7 @@
             //document.getElementById("regionDisplay").style.background = 'radial-gradient(' + baseColour + ' 30%, black)';
             document.getElementById("regionDisplay").style.webkitTextStroke  = "1px " + "whitesmoke";
             //document.getElementById("regionDisplay").style.textShadow  = "2px 2px 5px " + mapColour;
-            //document.getElementById("regionDisplay").style.background = 'radial-gradient(' + baseColour + ' 50%, black)';
+            document.getElementById("regionDisplay").style.background = 'radial-gradient(' + baseColour + ' 50%, black)';
             //document.getElementById("genreHeader").style.color = baseColour;
             //document.getElementById("genreHeader").style.webkitTextStroke  = "1px " + "whitesmoke";
             document.getElementById("genreHeader").style.textShadow  = "2px 2px 0px " + mapColour;

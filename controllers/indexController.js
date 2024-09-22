@@ -9,15 +9,16 @@ exports.genres = function(req, res) {
     let deathBandsJson = fs.readFileSync("./public/jsons/death-bands.json", 'utf8');
     let powerBandsJson = fs.readFileSync("./public/jsons/power-bands.json", 'utf8');
     let speedBandsJson = fs.readFileSync("./public/jsons/speed-bands.json", 'utf8');
+    let heavyBandsJson = fs.readFileSync("./public/jsons/heavy-bands.json", 'utf8');
    
     // geojson 4 maps
     let mapPlaces = fs.readFileSync("./public/jsons/ne_10m_populated_places.json", 'utf8');
-    let mapStates = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced40.json", 'utf8');
+    let mapStates = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced30.json", 'utf8');
     let mapBoundaries = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries_reduced.json", 'utf8');
-    let mapStatesBack = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced40.json", 'utf8');
+    let mapStatesBack = fs.readFileSync("./public/jsons/ne_10m_admin_1_states_provinces_scale_rank_reduced30.json", 'utf8');
     let mapBoundariesBack = fs.readFileSync("./public/jsons/ne_10m_admin_0_countries_reduced.json", 'utf8');
-    let usCounties = fs.readFileSync("./public/jsons/gz_2010_us_050_00_5m_reduced1.json", 'utf8');
-    let usStates = fs.readFileSync("./public/jsons/gz_2010_us_040_00_5m.json", 'utf8');
+    let usCounties = fs.readFileSync("./public/jsons/gz_2010_us_050_00_500k_reduced10.json", 'utf8');
+    let usStates = fs.readFileSync("./public/jsons/gz_2010_us_040_00_500k_reduced10.json", 'utf8');
     let canadaDivs = fs.readFileSync("./public/jsons/canada-divisions_reduced3.json", 'utf8');
     let germanDivs = fs.readFileSync("./public/jsons/german-divisions_reduced2.json", 'utf8');
     let ausDivs = fs.readFileSync("./public/jsons/SA4_2021_AUST_GDA2020_reduced05.json", 'utf8');
@@ -37,6 +38,7 @@ exports.genres = function(req, res) {
                           ejs_black_bands: blackBandsJson,
                           ejs_death_bands: deathBandsJson,  
                           ejs_power_bands: powerBandsJson,
+                          ejs_heavy_bands: heavyBandsJson,
                           ejs_speed_bands: speedBandsJson,  
                           ejs_continents: metalContinents,
                           ejs_state_data: usStateData,
