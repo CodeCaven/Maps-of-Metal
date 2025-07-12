@@ -6,15 +6,9 @@ https://www.youtube.com/@MetalMaps
 
 <img src="img/new-logo-1.png" width="20%" alt="qc" />  
 
-<img src="img/1-screen-southeast-asia-death.png" alt="qc" />  
-
-<img src="img/2-screen-mexico-death.png" alt="qc" />  
-
-<img src="img/h3-screen-baltic-death.png" alt="qc" />  
+<img src="img/northeast-heavy-thumb.png" alt="qc" />  
 
 <img src="img/sweden-black-thumb.png" alt="qc" />  
-
-<img src="img/northeast-heavy-thumb.png" alt="qc" />  
 
 <img src="img/argentina-death-thumb.png" alt="qc" />  
 
@@ -23,3 +17,11 @@ https://www.youtube.com/@MetalMaps
 <img src="img/california-heavy-screen-crop-3.png" alt="qc" />  
 
 <img src="img/germany-black-screen-thumb-crop.png" alt="qc" />  
+
+<img src="img/1-screen-southeast-asia-death.png" alt="qc" />  
+
+<img src="img/2-screen-mexico-death.png" alt="qc" />  
+
+<img src="img/3-screen-baltic-death.png" alt="qc" />  
+
+
