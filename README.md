@@ -4,7 +4,7 @@ Development repository for the Maps of Metal YouTube Channel.
 
 https://www.youtube.com/@MetalMaps
 
-<img src="img/new-logo-1.png" alt="qc" />  
+<img src="img/new-logo-1.png" width="20%" alt="qc" />  
 
 <img src="img/1-screen-southeast-asia-death.png" alt="qc" />  
 
