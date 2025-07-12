@@ -327,9 +327,9 @@ function create_gradient_filter_boundary(svg, color){
 // 25.95869742150703, -80.18399025249953 39.290354045557145, -6.536913845087203, 107.21709400898749, -74.98932576902578
 var multi_views = {"Canada":[{"loc":[-123.116226, 49.246292], "radius": 32, "tags":["Vancouver", "Victoria"]},
                             {"loc":[-74.65217687661148, 45.51990252147928], "radius": 29, "tags":["Montreal", "Ottawa"]}],
-                   "California":[{"loc":[-122.431297, 37.773972], "radius": 40, "tags":["San Francisco"]}], // "San Jose", , "Oakland"
-                   "Southwest":[{"loc":[-122.431297, 37.773972], "radius": 28, "tags":["San Francisco","Oakland"]}], // removed shorts , "Oakland"
-                   "Brazil":[{"loc":[-46.502222012480885, -23.751400556216666], "radius": 26, "tags":['São Paulo', "Santos"]}],// -23.751400556216666, -46.502222012480885
+                   "Southwest":[{"loc":[-122.431297, 37.773972], "radius": 37, "tags":["San Francisco","San Jose"]}], // "San Jose", , "Oakland" // can be CALIFORNIA too
+                   "BLACK Southwest":[{"loc":[-122.431297, 37.773972], "radius": 28, "tags":["San Francisco","Oakland"]}], // removed shorts , "Oakland"
+                   "BLACK Brazil":[{"loc":[-46.502222012480885, -23.751400556216666], "radius": 26, "tags":['São Paulo', "Santos"]}],// -23.751400556216666, -46.502222012480885
                    "Midwest":[{"loc":[-104.88676216053005,  39.290354045557145], "radius": 35, "tags":["Denver", "Colorado Springs"]}],
                    "THRASH Northeast":[{"loc":[ -76.88485526922724,  39.154907715375444], "radius": 30, "tags":["Baltimore", 'Washington, D.C.']},
                                 //{"loc":[ -73.16056222266681,  41.05539314235577], "radius": 23, "tags":["Long Island", 'Bridgeport']},// removed shorts
@@ -339,13 +339,13 @@ var multi_views = {"Canada":[{"loc":[-123.116226, 49.246292], "radius": 32, "tag
                                 {"loc":[ -71.2648711576945,  42.09195435040254], "radius": 28, "tags":["Boston", 'Providence']}],
                    "BLACK Northeast":[{"loc":[ -71.2648711576945,  42.09195435040254], "radius": 28, "tags":["Boston", 'Providence']}],
                    "Northeast":[{"loc":[ -76.88485526922724,  39.154907715375444], "radius": 30, "tags":["Baltimore", 'Washington, D.C.']},
-                                {"loc":[ -72.97716108550239,  41.087216947468434], "radius": 23, "tags":["Long Island", 'New Haven']}],// 41.087216947468434, -72.97716108550239
+                                {"loc":[ -72.97716108550239,  41.087216947468434], "radius": 23, "tags":["Long Island"]}],// , 'New Haven' removed shorts
                    "United Kingdom":[{"loc":[ -2.9262719286836014,  51.47573264168695], "radius": 26, "tags":["Cardiff", 'Bristol']}],
                    "THRASH Italy":[{"loc":[ 10.773033184863754,  43.71804196778421], "radius": 25, "tags":["Florence", 'Pisa']}],// 43.71804196778421, 10.773033184863754
                    "Florida":[{"loc":[ -80.18399025249953,  25.95869742150703], "radius": 32, "tags":["Miami", 'Fort Lauderdale']}],
                    "Southeast":[{"loc":[ -80.18399025249953,  25.95869742150703], "radius": 26, "tags":["Miami", 'Fort Lauderdale']}],
                    "South":[{"loc":[ -97.08654828152304,  32.78257194600529], "radius": 32, "tags":["Dallas", 'Arlington', 'Fort Worth']}],
-                   "Germany":[{"loc":[ 7.035311385098635,  51.34081411741906], "radius": 32, "tags":["Düsseldorf", "Essen", 'Dortmund']}],
+                   "HEAVY Germany":[{"loc":[ 7.035311385098635,  51.34081411741906], "radius": 32, "tags":["Düsseldorf", "Essen"]}], // , 'Dortmund' removed shorts
                    "Japan":[{"loc":[ 135.484802,  34.672314], "radius": 25, "tags":["Osaka", "Kobe"]}],// -33.71405288841591, -59.61414288809401
                    "Argentina":[{"loc":[ -59.61414288809401,  -33.71405288841591], "radius": 32, "tags":['Buenos Aires', "Rosario"]}],
                    "Switzerland":[{"loc":[ 7.663563991861752,  47.521574776224504], "radius": 29, "tags":["Basel", "Liestal"]},
@@ -354,7 +354,8 @@ var multi_views = {"Canada":[{"loc":[-123.116226, 49.246292], "radius": 32, "tag
                                   {"loc":[-70.25695751408225,   -19.3036839930471], "radius": 25, "tags":['Iquique', "Arica"]}],
                    "Netherlands":[{"loc":[ 4.379864637344544,  51.99452040597082], "radius": 33, "tags":["The Hague", "Rotterdam"]}],// 51.99452040597082, 4.379864637344544
                    "THRASH Sweden":[{"loc":[ 12.517292382989,  57.87234834345384], "radius": 30, "tags":['Gothenburg','Trollhättan','Borås']},
-                              {"loc":[ 17.71931872790887,  59.33162966448431], "radius": 30, "tags":['Stockholm','Uppsala']}],//59.33162966448431, 17.71931872790887
+                              {"loc":[ 17.71931872790887,  59.33162966448431], "radius": 30, "tags":['Stockholm','Uppsala']}],
+                   "Sweden":[{"loc":[ 12.517292382989,  57.87234834345384], "radius": 28, "tags":['Gothenburg','Borås']}],
                    "Indonesia":[{"loc":[ 107.21709400898749,  -6.536913845087203], "radius": 32, "tags":["Jakata", "Bandung"]}],//57.87234834345384, 12.517292382989
                    "Southeast Asia":[{"loc":[ 107.21709400898749,  -6.536913845087203], "radius": 28, "tags":["Jakata", "Bandung"]},
                                     //{"loc":[ 105.73407405349023,  11.26707236413902], "radius": 24, "tags":["Ho Chi Minh City", "Phnom Penh"]}, // removed shorts
@@ -454,7 +455,7 @@ var neighbours = {"Northeast":["Ohio", "Kentucky", "Virginia", "West Virginia", 
                   "Germany": ["Russia", "Ukraine", "Lithuania", "Belarus", "Slovenia", "Romania", "Slovakia", "Hungary", "Italy", "Czech Republic","France", "Netherlands", "Austria", "Denmark", "Poland", "Switzerland",  "United Kingdom", "Luxembourg", "Belgium"],
                   "Southeast":["Nebraska", "Iowa", "New Jersey", "New York", "Pennsylvania", "Maryland", "Delaware", "Illinois", "Indiana", "Ohio", 'Texas', "Louisiana", "Oklahoma", "Arkansas", "Kansas", "Missouri"],
                   "South":["Tennessee", "Arizona", "Florida", "Utah", "Colorado", "Mississippi", "Kansas", "Missouri", "Alabama", "Georgia", "North Carolina", "South Carolina", "Illinois", "Kentucky", "Virginia", "West Virginia", "Indiana", "Maryland", "Ohio"], 
-                  "Southwest":["Nebraska", "Colorado", "Oklahoma", "Kansas", "Oregon", "Idaho", "Wyoming", "New Mexico", "Texas"],
+                  "Southwest":["South Dakota","Nebraska", "Colorado", "Oklahoma", "Kansas", "Oregon", "Idaho", "Wyoming", "New Mexico", "Texas"],
                   "Northwest":["California", "Nevada", "Utah", "Colorado"],
                   "Midwest":["Arkansas", "Arizona", "Idaho", "Montana", "Wyoming", "Utah", "Texas", "New Mexico", "Oklahoma", "Mississippi", "Maryland", "North Carolina", "Tennessee", "South Carolina", "Georgia", "Alabama", "Pennsylvania", "New York", "Ohio", "Kentucky", "Illinois", "Virginia", "West Virginia", "Michigan", "Wisconsin", "Indiana"], 
                   "Great Lakes":["Oklahoma","Virginia", "West Virginia", "Kentucky", "Connecticut", "Rhode Island", "District of Columbia", "Delaware", "North Dakota", "South Dakota", "Kansas", "Nebraska", "New Hampshire", "Vermont","New York", "Maryland", "Massachusetts", "Pennsylvania", "New Jersey", "Iowa", "Minnesota", "Missouri", "West Virginia"], 
@@ -468,10 +469,10 @@ let anchors = {"Los Angeles": "end", "Long Beach": "start", "Oakland": "start","
  "Bergen": "end", "Umeå": "start", "Seattle":"end","New York City": "end",  "Albany":"top", "Boston": "start", "Portland": "end","Amarillo":"top",
   "Derby":'start', "Sapcote":'start', "Hartford":"end", "Trenton": "end",  "Dallas" : "start", "Cedar Rapids":"top", "Omaha":"end","DeKalb":"end",
   "Tampa" : "end", "Austin": "top", "Albuquerque":"start", "Corpus Christi":"start","Medellín":"end","Canberra":"end","Phnom Penh":'top',
-"Berlin":"start", "Essen":"top", "Dortmund":"start", "Waco":"end", "Little Rock":"start","Fort Worth":"end","Santa Cruz":"end","Taranto":"start",
+"Berlin":"start", "Essen":"top", "Dortmund":"top", "Waco":"end", "Little Rock":"start","Fort Worth":"end","Santa Cruz":"end","Taranto":"start",
 "Santiago" : "start", "Rio de Janeiro":"start", "Belo Horizonte" : "start","Louisville":"end", "Montevideo":"start","Riverside":'top',"Milwaukee":"end",
-"Lima": "end", "Bogata": "end", "Detroit": "start",  "Minneapolis":"top","Hamar":"start","Salvador":"start","Fargo":"start",
-"Salt Lake City":"top", "Washington":"start",'Asunción':'end','São Paulo':'end','Örebro':'end',"Topeka":"end","Sydney":'top',"Brisbane":"end","Mammoth Lakes":'start',
+"Lima": "end", "Bogata": "end", "Detroit": "start",  "Minneapolis":"top","Hamar":"start","Fargo":"start",'Ulm':'start',
+"Salt Lake City":"top", "Washington":"start",'Asunción':'end','São Paulo':'end','Örebro':'top',"Topeka":"end","Sydney":'top',"Brisbane":"end","Mammoth Lakes":'start',
 "Munich":"start",  "Hamburg":"end",  "Sacramento":"top", "Memphis":"end", 'Wrocław':'end',  'Sandviken':'start','Visby':'start',"Bari":"start","Bologna":"start",
 "London":"start","Newcastle upon Tyne":"start","Liverpool":"end","Belfast":"end", "Kansas City":"top","Salamanca":"end","Syracuse":"top",
 'Bonn': 'end','Stuttgart': 'end','Leipzig': 'start', 'Münster': 'top',"Buffalo":"end","Rochester":"top","Poznań":'end',"Wollongong":"start","Bolzano":"start","Lecce":'end',
@@ -497,32 +498,33 @@ let anchors = {"Los Angeles": "end", "Long Beach": "start", "Oakland": "start","
  'Tilburg':'end', 'North Brabant':'start','Heerlen':'start', 'Funchal':'start', 'Lisbon':'end', 'Porto':'end','Aveiro':'end', 'Leiria':'end','Weinfelden':'start','Geneva':'start','Lausanne':'end','Bielefeld':'top',
 'Heraklion':'start','Athens':'start', 'Larissa':'top','Ioannina':'top', 'Volos':'start', 'Serres':'start','Thessaloniki':'end',"Chania":'end','Basel':'top','Zurich':'end','Hinwil':'start','Chur':'start','Massagno':'start','Sion':'top','Bern':'top','Lucerne':'start',
 'Thun':'top','Kerzers':'top','Ulaanbaatar':'top','Beijing':'end',"Malang":"top", "Tai'an":'end','Nanchang':'end','Shanghai':'start','Taipei':'start',"Jinzhou":'top','Seoul':'top','Hong Kong':'top',"Gomel":'start',"Cēsis":'start',
-'Denpasar':'start','Quezon City':'start','Cebu City':'start', 'Bangkok':'end','Chișinău':'end','Kiev':'top','Mykolaiv':'start','Minsk':'top',"Grodno":'top','Kharkiv':'start','Rivne':'end','Dnipro':'end',
+'Denpasar':'start','Quezon City':'start','Cebu City':'start', 'Bangkok':'end','Chișinău':'end','Kiev':'top','Mykolaiv':'start','Minsk':'top',"Grodno":'top','Kharkiv':'start','Rivne':'end','Dnipro':'end','Nuremberg':'start',
 'Tallinn':'end', 'Vilnius':'start','Kaunas':'end','Riga':'end','Tartu':'start','Curitiba':'end', "Teresina":"start","Santa Maria":"end","Natal":"end","Criciúma":"start","Ji-Paraná":"start",'Valparaíso':'end','Arica':'top','Pennsylvania':'top',"Agrigento":'end',
 "Concepción":'start',"Copiapó":'end',"Puerto Montt":'start','Rosario':'top','Salta':'start','Neuquén':'end','Bahía Blanca':'start','Rio Grande':'end','Manizales':'end','Cali':'end','Pasto':'end',"Bucaramanga":'start','Cartagena':'end',"Columbus":'start',
 'Copenhagen':'top','Roskilde':'end','Aarhus':'end','Esbjerg':'start','Aalborg':'end','Odense':'top','Kolding':'top','Næstved':'start',"Ringsted":'start',"Slagelse":'top',"Macerata":'start','Pisa':'end','Washington, D.C.':'end',"Florence":"start","San Francisco":'end',
 'Rome':'end','Naples':'end','Borås':'start','Trollhättan':'top','Västerås':'end','Uppsala':'top','Linköping':'start','Växjö':'start','Karlstad':'end',"Falkenberg":'end',"Swansea":'end','Mielec':'start','Toruń':'end','Gdańsk':'start','Warsaw':'start',"Fond du Lac":'end',
 'Szerencs':'start','Nagyatád':'start','Helsingborg':'end','Östersund':'end','Nagykanizsa':'start','Zalaegerszeg':'start','Szombathely':'start','Veszprém':'start','Szigetvár':'start', 'Szeged':'start','Debrecen':'end','Miskolc':'end','Perzów':'start','Łódź':'top','Zielona Góra':'top','Olsztyn':'start','Dukla':'start',
-'Hanover':'top', 'Frankfurt':'end','Skien':'end','Helsinki':'start','Rovaniemi':'start','Paris':'start',"León":'end',"Weil am Rhein":'start', 'Los Mochis':'end','Bradford':'top', 'New Haven':'top'};
+'Hanover':'end', 'Frankfurt':'start','Skien':'end','Helsinki':'start','Rovaniemi':'start','Paris':'start',"León":'end',"Weil am Rhein":'start', 'Los Mochis':'end','Bradford':'top', 'New Haven':'top','Belém':'end','Karlsruhe':'top',
+'Bollnäs':'top','Falun':'end', 'Flagstaff':'top', 'Las Vegas':'top'};
 
  let radii = {'Washington, D.C.': 18,'Providence': 14,'Philadelphia': 22, 'Hartford':22, 'Buffalo':22,'New Jersey': 23, 'Pittsburgh': 24,'New York City': 29,'Boston': 22,'Bridgeport': 14,'New Brunswick': 20,'Minneapolis': 25,"Atlanta": 23,"Melbourne":28,"Granada‎":22,"Valencia":22,
- 'Arvada': 20,'Greeley': 17,'Kansas City': 20,'Denver': 25,'Iowa City': 20,'Fargo': 20,'Omaha': 20,'St. Louis': 25,'Minot': 20,'Cedar Rapids': 23,'Saint Paul': 20,"Berlin":25,"Frankfurt":26, "Munich":22, "Hamburg":24,"Adelaide":23,
+ 'Arvada': 20,'Greeley': 17,'Kansas City': 20,'Denver': 25,'Iowa City': 20,'Fargo': 20,'Omaha': 20,'St. Louis': 25,'Minot': 20,'Cedar Rapids': 23,'Saint Paul': 20,"Berlin":25,"Frankfurt":23, "Munich":22, "Hamburg":27,"Adelaide":23,
  'Pueblo': 20,'Colorado Springs': 20,'Columbia': 20,'Springfield': 20,'Des Moines': 20,'Cedar Rapids': 20,'Fort Collins': 20,'Olathe': 20,'Omaha': 20,'Sioux Falls': 20, 'Weil am Rhein':24, "Siegen": 22,"Raleigh":19,"Perth":22,"Gomel":21,
- 'Milan': 28,'Rome': 28,'Turin': 27,'Verona': 23,'Udine': 20,'Naples': 25,'Florence': 20,'Catania': 22,'Palermo': 22,'Managua':22,"Kraków":26,'Łódź':24,"Tarnów":24,"Lyon":26,"Nashville":22,"Alexandria":22,"Phoenix":25,"Casablanca":22,
- 'Genoa': 25, 'Lecce':20, "Los Angeles":35, "San Francisco":30, "Oslo":30, "Bergen":29, "Stockholm": 30, 'San José':28,'Orlando': 19, 'Jacksonville': 20,"Paris":32,'Nice':26,"Toulouse":24,"Bordeaux":24, "Brest":23,"Tucson":22,"Zwolle":25,
+ 'Milan': 28,'Rome': 28,'Turin': 27,'Verona': 23,'Udine': 20,'Naples': 25,'Florence': 20,'Catania': 22,'Palermo': 22,'Managua':22,"Kraków":26,'Łódź':24,"Tarnów":24,"Lyon":26,"Nashville":22,"Alexandria":22,"Phoenix":25,"Casablanca":22,'Nuremberg':22,
+ 'Genoa': 25, 'Lecce':20, "Los Angeles":35, "San Francisco":30, "Oslo":30, "Bergen":29, "Stockholm": 30, 'San José':28,'Orlando': 19, 'Jacksonville': 20,"Paris":32,'Nice':26,"Toulouse":24,"Bordeaux":24, "Brest":23,"Tucson":22,"Zwolle":25,'Duisburg':18,
  'Guatemala City':25, 'San Salvador':25, "Chicago":28, "Detroit":24, "Cleveland":24, "Fort Wayne": 22, "Youngstown":18, "Portland":32, "Seattle":25,"Słupsk":23, 'Gdańsk':23,"Grenoble":22,"Strasbourg":22,"Santa Cruz":18,'Heerlen':22,'Grand Rapids':22,
- 'Cheyenne':15,'Laramie':15, 'Toronto':28,'Asunción':16,"San Diego":27, "Sacramento":22, "Tampa":20, "Miami":22, 'Fort Lauderdale': 22,'Warsaw':30, "Katowice": 24,'Kuopio':24,'Hanover':25,'Stuttgart':25,"Schweinfurt":23,"Enschede":22,
- 'Bogota': 27, 'Santiago': 30, "Newcastle upon Tyne":25, "London": 23, "Bristol": 20, "Birmingham":25, "Leeds": 21, "Brighton":17, "Glasgow":22, "Edinburgh":22, "Liverpool": 24,"Turku":24,'Jyväskylä':23,"Richmond":22,"Mammoth Lakes":19,
+ 'Cheyenne':15,'Laramie':15, 'Toronto':28,'Asunción':16,"San Diego":27, "Sacramento":18, "Tampa":20, "Miami":22, 'Fort Lauderdale': 22,'Warsaw':30, "Katowice": 24,'Kuopio':24,'Hanover':22,'Stuttgart':25,"Schweinfurt":23,"Enschede":22,'Saarbrücken':22,
+ 'Bogota': 27, 'Santiago': 30, "Newcastle upon Tyne":25, "London": 23, "Bristol": 20, "Birmingham":25, "Leeds": 21, "Brighton":17, "Glasgow":22, "Edinburgh":22, "Liverpool": 24,"Turku":24,'Jyväskylä':23,"Richmond":22,"Mammoth Lakes":19,'Karlsruhe':24,
 "Stavanger": 27, "Skien":26, "Sogndal":22, 'Trondheim':24, 'Hamar':22, 'Etne':22, 'Gothenburg':22, 'Dalarna': 18, 'Borlänge':18, 'Umeå': 26, 'Helsinki':30,'Oulu':26,'Hämeenlinna':20, 'Tampere': 22, 'Kouvola':18, 'Lahti':19,"Tunis":21,"Tripoli":17,
-'San Antonio':22, 'New Orleans':22,'Albuquerque':25, 'Houston':23, 'Tulsa':22, 'Austin':19, 'Sandviken':26, 'Helsingborg':28,'Linköping':24,'Ludvika':22,'Caracas':22,'Topeka':16, 'Mankato':18, "Canberra":16, "Brisbane":22,"Cape Town":24,"Port Elizabeth":18,
+'San Antonio':22, 'New Orleans':22,'Albuquerque':25, 'Houston':23, 'Tulsa':22, 'Austin':19, 'Sandviken':26, 'Helsingborg':22,'Linköping':24,'Ludvika':22,'Caracas':22,'Topeka':16, 'Mankato':18, "Canberra":16, "Brisbane":22,"Cape Town":24,"Port Elizabeth":18,
 "Venice":23,"Olympia":17,"Milwaukee":23, "Columbus":20, "Illinois":21,'Bilbao':17, 'Vitoria-Gasteiz':17,'Madrid':28,'Barcelona':30,"Zarautz":18,"León":17,"Algeciras":22,'Nagoya':17, 'Hamamatsu':17, 'Tokyo':25, 'Osaka':25,'Sapcote':16,"Derby":17,'Taipei':23,
-'Mexico City':34, "Monterrey": 26, "Tijuana":26,'Irapuato':21, 'Guadalajara':22, "Colima":18,'Cheltenham':18,'Tel Aviv':24,'Istanbul':24,'Tehran':24,"Ankara":22,"California":22,'Cologne':22,'Dortmund':25,'Osnabrück':22,"Erfurt":23,"Leipzig":21,'Augsburg':18,
+'Mexico City':34, "Monterrey": 26, "Tijuana":26,'Irapuato':21, 'Guadalajara':22, "Colima":18,'Cheltenham':18,'Tel Aviv':24,'Istanbul':24,'Tehran':24,"Ankara":22,"California":22,'Cologne':22,'Dortmund':22,'Osnabrück':22,"Erfurt":23,"Leipzig":21,'Augsburg':18,
 'Norwich':20,'Ipswich':18, "Semarang":24,'Bukittinggi':23, "Malang":20,'Kuala Lumpur':27,'Ipoh':24,'Kota Kinabalu':24,"Sandakan":24,"Alor Setar":22, 'Bangalore':23,'New Delhi':25,'Guwahati':22,'Karachi':22,'Amsterdam':28, 'The Hague':22, "Rotterdam":22,'Groningen':24,
 'Porto':29,'Lisbon':29,"Viseu":17, 'Faro':22, 'Leiria':22, 'Athens':30, 'Kerzers':24, 'Sion':24,'Thessaloniki':24, 'Ioannina':22,'Chania':20, "Tai'an":22, 'North Brabant':27, 'Utrecht':24,'Lausanne':24,'Seoul':24,'Beijing':24, "Bern":23,"Zurich":30,"Geneva":24, "Hinwil":18,
 'Quezon City':24,'Cebu City':24,'Bangkok':24,"Kiev":28,"Kharkiv":28,"Minsk":28, "Lviv":24,'Chișinău':22,'Mykolaiv':22,"Grodno":22,'Tallinn':29,'Riga':27,'Vilnius':27,'Kaunas':22,'Tartu':22,"Cēsis":21,"Medellín":23,'Manizales':23,'Cali':25,'Pasto':24,
 'Belo Horizonte':25,'Rio de Janeiro':25,'Porto Alegre':23,'Recife':22,'Brasília':24,'Curitiba':24,'São Paulo':26,"Puerto Montt":26,"Concepción":22,"Copiapó":22,'Salta':26,'Neuquén':23,'Bahía Blanca':25,'Rio Grande':21,"Bucaramanga":22,"Indianapolis":21,
-'Copenhagen':29,'Roskilde':22,'Aarhus':26,'Esbjerg':23,'Aalborg':22,"Slagelse":18,"Rimini":18,'Pisa':29,"Bologna":23,"Malmö":23,'Växjö':23,"Falkenberg":18,'Manchester':18,"Reading":18,'Nottingham':19,'Calgary':22,'Winnipeg':22,'Pennsylvania':22,
-"Budapest":32,'Szeged':25,'Szombathely':23,'Zalaegerszeg':23,'Veszprém':25,'Nagykanizsa':22,'Debrecen':21,'Miskolc':23,'Olsztyn':23,'Perzów':18,'Wrocław':23,'Zielona Góra':22,'Lublin':22,'Mielec':22,'Dukla':18,"Rochester":22,'Washington, D.C.':22,
+'Copenhagen':29,'Roskilde':22,'Aarhus':26,'Esbjerg':23,'Aalborg':22,"Slagelse":18,"Rimini":18,'Pisa':29,"Bologna":23,"Malmö":23,'Växjö':23,"Falkenberg":18,'Manchester':18,"Reading":18,'Nottingham':19,'Calgary':22,'Winnipeg':22,'Pennsylvania':22,'Karlskrona':22,
+"Budapest":32,'Szeged':25,'Szombathely':23,'Zalaegerszeg':23,'Veszprém':25,'Nagykanizsa':22,'Debrecen':21,'Miskolc':23,'Olsztyn':23,'Perzów':18,'Wrocław':23,'Zielona Góra':22,'Lublin':22,'Mielec':22,'Dukla':18,"Rochester":22,'Washington, D.C.':22,'Karlstad':22,
 "Amarillo":22,"El Paso":22}
 
 

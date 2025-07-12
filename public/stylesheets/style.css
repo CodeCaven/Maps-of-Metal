@@ -60,7 +60,7 @@ a {
 
 #genreContainer{
   position:absolute;
-  top:50px;/* top 50px bottom 380px canada 410px australia 430px*/
+  top:380px;/* top 50px bottom 380px canada 410px australia 430px*/
   left:130px; 
   width:200px;/* DONT FORGET put back band jsons for thrash and death*/
   opacity:1;

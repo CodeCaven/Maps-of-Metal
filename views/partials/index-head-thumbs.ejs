@@ -62,23 +62,23 @@
         let animate_timeout;
         let current_projection;
         let simulation;
-        let us_region = ""; // see death_data 4 midwest international bands when SHORTS
+        let us_region = "Southwest"; // see death_data 4 midwest international bands when SHORTS
         let world_region = ""; 
-        let region = "California"; // "California" "United Kingdom"
+        let region = ""; // "California" "United Kingdom"
         let display_region = "US"; // World US
-        let grouped_region = false;
+        let grouped_region = true;
         let display_continent = "North America"; // not used
         let pop_max = 150000000000;
         let THEME = "dark";
         let current_year = 1980;
-        let cap = 120; // southeast asia death 77,greece 77 south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
+        let cap = 90; // southeast asia death 77,greece 77 south thrash 100, norway black 80, sweden black 80, finland black 80, poland 85, uk desth 85, samer thrash 80, camer thrash 90, northeast thrash 80, northeast death 82 (- 2 from sweden) cali thrash 80, florida death 82
         let prev_year;
         let nodes = [];
         let links = [];
         let display_bands_list = [];
         let lookup = {};
         let display_bands = {"heavy":false,"thrash":false, "black":false, "death":false, "power":false, "speed":false};
-        let display_genre = "heavy";
+        let display_genre = "power";
         let changes = false;
         let changes_add = false;
         let changes_remove = false;
@@ -393,6 +393,12 @@
                     band_image_tag.setAttribute("src", logo_path);
                     band_image_tag.style.marginLeft = "14px"; // add margin for lhs
                     band_image_tag.style.marginRight = "14px";
+                }
+                else if(band['name'] == 'Bang'){ // tall bands
+                    band_image_tag.setAttribute("height", 70);
+                    band_image_tag.setAttribute("src", logo_path);
+                    band_image_tag.style.marginLeft = "9px"; // add margin for lhs
+                    band_image_tag.style.marginRight = "9px";
                 }
                 else if(band['name'] == 'Faceless and Descending'){ // tall bands
                     band_image_tag.setAttribute("height", 70);
