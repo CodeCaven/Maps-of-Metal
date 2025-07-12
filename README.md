@@ -1,6 +1,6 @@
 # Maps of Metal
 
-Development repository for the Maps of Metal __YouTube Channel__.  
+Front-end Development repository for the Maps of Metal __YouTube Channel__.  
 
 https://www.youtube.com/@MetalMaps
 
